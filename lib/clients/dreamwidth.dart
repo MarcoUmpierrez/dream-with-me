@@ -57,8 +57,8 @@ class DreamWidthClient {
   Future<bool> login(String userName, String password) async {
     this._addAccount(userName, password);
     Map<String, XmlParam> data = await this.method('login', {
-      'getpickws':XmlInt('int', '1'),
-      'getpickwurls':XmlInt('int', '1'),
+      'getpickws':XmlInt('1'),
+      'getpickwurls':XmlInt('1'),
     });
 
     currentUser.picURL = data['defaultpicurl'].getValue();

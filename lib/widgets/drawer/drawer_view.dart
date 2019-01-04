@@ -14,10 +14,17 @@ class DrawerView extends StatelessWidget {
       child: ListView(
         children: <Widget>[
           DrawerHeaderView(this.client.currentUser),
+          ListTile(title: Text('Post'), trailing: Icon(Icons.edit)),
           Divider(),
+          ListTile(title: Text('Profile'), trailing: Icon(Icons.person)),
+          ListTile(title: Text('Inbox'), trailing: Icon(Icons.inbox)),
+          ListTile(title: Text('Reading'), trailing: Icon(Icons.people)),
+          Divider(),       
+          // TODO: add list of tags
+          ListTile(title: Text('Add account'), trailing: Icon(Icons.person_add)),
           ListTile(
-              trailing: Icon(Icons.exit_to_app),
               title: Text('Logout'),
+              trailing: Icon(Icons.exit_to_app),
               onTap: () {
                 // Update the state of the app
                 this.client.logOut();
