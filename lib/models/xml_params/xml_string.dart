@@ -2,10 +2,8 @@ import 'package:dreamwithme/models/xml_param.dart';
 import 'package:xml/xml.dart';
 
 class XmlString implements XmlParam {
-  String type;
   String value;
-  XmlString(type, value) {
-    this.type = type;
+  XmlString(value) {
     this.value = value;
   }
 
@@ -16,6 +14,6 @@ class XmlString implements XmlParam {
 
   @override
   XmlElement getXmlValue() {   
-    return XmlElement(XmlName(this.type), [], [XmlText(this.value)]);
+    return XmlElement(XmlName('string'), [], [XmlText(this.value)]);
   }
 }

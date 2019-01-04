@@ -3,10 +3,8 @@ import 'package:xml/xml.dart';
 import 'dart:convert';
 
 class XmlBase64 implements XmlParam {
-  String type;
   String value;
-  XmlBase64(type, value) {
-    this.type = type;
+  XmlBase64(value) {
     this.value = value;
   }
 
@@ -17,6 +15,6 @@ class XmlBase64 implements XmlParam {
 
   @override
   XmlElement getXmlValue() {   
-    return XmlElement(XmlName(this.type), [], [XmlText(this.value)]);
+    return XmlElement(XmlName('base64'), [], [XmlText(this.value)]);
   }
 }

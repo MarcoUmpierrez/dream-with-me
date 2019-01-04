@@ -2,10 +2,8 @@ import 'package:dreamwithme/models/xml_param.dart';
 import 'package:xml/xml.dart';
 
 class XmlArray implements XmlParam {
-  String type;
   List<Map<String, XmlParam>> items;
-  XmlArray(String type) {
-    this.type = type;
+  XmlArray() {
     this.items = List<Map<String, XmlParam>>();
   }
 
@@ -17,7 +15,7 @@ class XmlArray implements XmlParam {
   @override
   XmlElement getXmlValue() {   
     // TODO: implement XmlElement for an array
-    // return XmlElement(XmlName(this.type), [], [XmlText(this.value)]);
+    // return XmlElement(XmlName('array'), [], [XmlText(this.value)]);
     return null;
   }
 }

@@ -2,11 +2,9 @@ import 'package:dreamwithme/models/xml_param.dart';
 import 'package:xml/xml.dart';
 
 class XmlInt implements XmlParam {
-  String type;
   String value;
   int _value;
-  XmlInt(type, value) {
-    this.type = type;
+  XmlInt(value) {
     this.value = value;
     this._value = int.parse(value);
   }
@@ -18,6 +16,6 @@ class XmlInt implements XmlParam {
 
   @override
   XmlElement getXmlValue() {   
-    return XmlElement(XmlName(this.type), [], [XmlText(this.value)]);
+    return XmlElement(XmlName('int'), [], [XmlText(this.value)]);
   }
 }
