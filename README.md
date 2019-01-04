@@ -1,4 +1,4 @@
-# Dream With me
+# Dream With Me
 
 Flutter client for [Dreamwidth.org](https://dreamwidth.org)
 

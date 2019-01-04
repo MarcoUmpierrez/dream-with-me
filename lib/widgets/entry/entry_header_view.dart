@@ -37,11 +37,10 @@ class EntryHeaderView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Container(
-                  child: Text(this.entry.subjectRaw,
-                      overflow: TextOverflow.clip, style: entryTitle),
-                  padding: EdgeInsets.only(left: 5.0),
-                  width: MediaQuery.of(context).size.width - 200.0
-                ),
+                    child: Text(this.entry.subjectRaw,
+                        overflow: TextOverflow.clip, style: entryTitle),
+                    padding: EdgeInsets.only(left: 5.0),
+                    width: MediaQuery.of(context).size.width - 200.0),
                 EntryDateView(this.entry.getDate()),
               ],
             )

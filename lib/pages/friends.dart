@@ -1,6 +1,6 @@
 import 'package:dreamwithme/clients/dreamwidth.dart';
 import 'package:dreamwithme/models/entry.dart';
-import 'package:dreamwithme/widgets/drawer.dart';
+import 'package:dreamwithme/widgets/drawer/drawer_view.dart';
 import 'package:dreamwithme/widgets/entry/entry_view.dart';
 import 'package:flutter/material.dart';
 
@@ -63,7 +63,7 @@ class _FriendsPageState extends State<FriendsPage> {
           )
         ],
       ),
-      drawer: AppDrawer(widget.client.currentUser),
+      drawer: DrawerView(widget.client),
       body: this._isLoading ? loadBar : Center(
       child: ListView.builder(
           itemCount: this._entries.length,

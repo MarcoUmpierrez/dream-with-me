@@ -22,6 +22,13 @@ class DreamWidthClient {
     this.currentUser = user;
   }
 
+  void logOut() {
+    this.users.remove(this.currentUser);
+    if (this.users.length > 0) {
+      this.currentUser = this.users.first;
+    }
+  }
+
   // Get challenge auth token
   Future<Challenge> getChallenge() async {
     Map<String, XmlParam> data = await client.xmlRpcRequest('getchallenge');

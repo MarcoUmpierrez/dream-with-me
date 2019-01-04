@@ -29,16 +29,15 @@ class EntryDateView extends StatelessWidget {
     }
 
     return Container(
-      child: Column(
-        children: <Widget>[
-          Text(month, style: TextStyle(fontSize: 9.0, color: this.fontColor)),
-          Text(day, style: TextStyle(fontSize: 25.0, color: this.fontColor)),
-          Text(this.date.year.toString(),
-              style: TextStyle(fontSize: 10.0, color: this.fontColor))
-        ],
-      ),
-      padding: EdgeInsets.all(5.0),
-      margin: EdgeInsets.all(2.0)
-    );
+        child: Column(
+          children: <Widget>[
+            Text(month, style: TextStyle(fontSize: 9.0, color: this.fontColor)),
+            Text(day, style: TextStyle(fontSize: 25.0, color: this.fontColor)),
+            Text(this.date.year.toString(),
+                style: TextStyle(fontSize: 10.0, color: this.fontColor))
+          ],
+        ),
+        padding: EdgeInsets.all(5.0),
+        margin: EdgeInsets.all(2.0));
   }
 }

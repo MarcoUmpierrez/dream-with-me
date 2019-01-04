@@ -7,8 +7,6 @@ void main() => runApp(DreamWithMe());
 
 class DreamWithMe extends StatelessWidget {
   static DreamWidthClient client = DreamWidthClient();
-  static GlobalKey loginKey = GlobalKey(debugLabel: LoginPage.tag);
-  static GlobalKey friendKey = GlobalKey(debugLabel: FriendsPage.tag);
 
   // This widget is the root of your application.
   @override
@@ -40,10 +38,10 @@ class DreamWithMe extends StatelessWidget {
         //   subhead: TextStyle(fontSize: 14.0, color: Colors.white),
         // )
       ),
-      home: LoginPage(key: loginKey, client: client),
+      home: LoginPage(client: client),
       routes: <String, WidgetBuilder> {
-        LoginPage.tag: (context) => LoginPage(key: loginKey, client: client),
-        FriendsPage.tag: (context) => FriendsPage(key: friendKey, client: client),
+        LoginPage.tag: (context) => LoginPage(client: client),
+        FriendsPage.tag: (context) => FriendsPage(client: client),
       },
     );
   }
