@@ -1,5 +1,5 @@
 import 'package:dreamwithme/models/entry.dart';
-import 'package:dreamwithme/widgets/entry/entry_date_view.dart';
+import 'package:dreamwithme/widgets/date_view.dart';
 import 'package:flutter/material.dart';
 
 class EntryHeaderView extends StatelessWidget {
@@ -41,7 +41,7 @@ class EntryHeaderView extends StatelessWidget {
                         overflow: TextOverflow.clip, style: entryTitle),
                     padding: EdgeInsets.only(left: 5.0),
                     width: MediaQuery.of(context).size.width - 200.0),
-                EntryDateView(this.entry.getDate()),
+                DateView(this.entry.getDate()),
               ],
             )
           ],

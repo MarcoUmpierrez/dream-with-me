@@ -4,13 +4,14 @@ import 'package:dreamwithme/models/account.dart';
 import 'package:dreamwithme/models/entry.dart';
 import 'package:dreamwithme/models/xml_param.dart';
 import 'package:dreamwithme/models/xml_params/xml_int.dart';
+import 'package:dreamwithme/models/xml_params/xml_string.dart';
 import 'package:dreamwithme/utils/md5.dart';
 
 class DreamWidthClient {
   XMLRPCClient client;
   List<Account> users;
   Account currentUser;
-  
+
   DreamWidthClient() {
     this.users = [];
     this.client = XMLRPCClient();
@@ -33,7 +34,7 @@ class DreamWidthClient {
   Future<Challenge> getChallenge() async {
     Map<String, XmlParam> data = await client.xmlRpcRequest('getchallenge');
     return Challenge(
-      data['challenge'].getValue(), 
+      data['challenge'].getValue(),
       authScheme: data['auth_scheme'].getValue(),
       expireTime: data['expire_time'].getValue(),
       serverTime: data['server_time'].getValue(),
@@ -41,14 +42,18 @@ class DreamWidthClient {
   }
 
   // Generic method
-  Future<Map<String, XmlParam>> method(String methodName, Map<String, XmlParam> params) async {
+  Future<Map<String, XmlParam>> _methodCall(String methodName, {Map<String, XmlParam> params}) async {
     Challenge data = await this.getChallenge();
 
+    if (params == null) {
+      params = {};
+    }
+
     params.addAll({
-      'auth_challenge': XmlParam('string', data.challenge),
-      'auth_response': XmlParam('string', generateMd5(data.challenge + this.currentUser.password)),
-      'username': XmlParam('string', this.currentUser.userName),
-      'auth_method': XmlParam('string', 'challenge'),
+      'auth_challenge': XmlString(data.challenge),
+      'auth_response': XmlString(generateMd5(data.challenge + this.currentUser.password)),
+      'username': XmlString(this.currentUser.userName),
+      'auth_method': XmlString('challenge'),
     });
 
     return client.xmlRpcRequest(methodName, params);
@@ -56,17 +61,17 @@ class DreamWidthClient {
 
   Future<bool> login(String userName, String password) async {
     this._addAccount(userName, password);
-    Map<String, XmlParam> data = await this.method('login', {
-      'getpickws':XmlInt('1'),
-      'getpickwurls':XmlInt('1'),
+    Map<String, XmlParam> data = await this._methodCall('login', params: {
+      'getpickws': XmlInt('1'),
+      'getpickwurls': XmlInt('1'),
     });
 
-    currentUser.picURL = data['defaultpicurl'].getValue();
+    this.currentUser.picURL = data['defaultpicurl'].getValue();
     return true;
   }
 
   Future<List<Entry>> getReadPage() async {
-    Map<String, XmlParam> data = await this.method('getreadpage', {});
+    Map<String, XmlParam> data = await this._methodCall('getreadpage');
     XmlParam entryArray = data['entries'];
     List<Map<String, XmlParam>> entries = entryArray.getValue();
     List<Entry> list = [];
@@ -111,7 +116,7 @@ class DreamWidthClient {
         list.add(post);
       });
     }
-    
+
     return list;
   }
 }
