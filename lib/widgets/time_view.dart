@@ -6,22 +6,20 @@ class TimeView extends StatelessWidget {
 
   TimeView(this.date);
 
-   @override
+  @override
   Widget build(BuildContext context) {
     String hours = this.date.hour.toString();
-    hours = hours.length == 1? '0$hours' : hours;
+    hours = hours.length == 1 ? '0$hours' : hours;
     String minutes = this.date.minute.toString();
-    minutes = minutes.length == 1? '0$minutes' : minutes;
+    minutes = minutes.length == 1 ? '0$minutes' : minutes;
 
-    return Row(
-      children: <Widget>[        
-        Text(hours, style: TextStyle(fontSize: 25.0, color: this.fontColor)),
-        Container(
+    return Row(children: <Widget>[
+      Text(hours, style: TextStyle(fontSize: 25.0, color: this.fontColor)),
+      Container(
           padding: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 10.0),
-          child: Text(minutes, style: TextStyle(fontSize: 10.0, color: this.fontColor))
-        ),
-        Icon(Icons.alarm, color: this.fontColor),
-      ]
-    );
+          child: Text(minutes,
+              style: TextStyle(fontSize: 10.0, color: this.fontColor))),
+      Icon(Icons.alarm, color: this.fontColor),
+    ]);
   }
 }

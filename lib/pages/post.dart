@@ -1,5 +1,7 @@
 import 'package:dreamwithme/clients/dreamwidth.dart';
+import 'package:dreamwithme/utils/tuple.dart';
 import 'package:dreamwithme/widgets/date_view.dart';
+import 'package:dreamwithme/widgets/dialogs/checkbox_list.dart';
 import 'package:dreamwithme/widgets/time_view.dart';
 import 'package:flutter/material.dart';
 
@@ -16,11 +18,54 @@ class PostPage extends StatefulWidget {
 class _PostPageState extends State<PostPage> {
   String _title, _body;
   DateTime _date = DateTime.now();
+  List<Tuple<String, bool>> _tags = [];
+  String _tagCaption = 'Select tags';
+
   final _formKey = GlobalKey<FormState>();
 
   @override
-  Widget build(BuildContext context) {
+  void initState(){
+    super.initState();
+    // TODO: implement request for tags
+    // widget.client.getTags().then((tags) {
+    //   this._tags.addAll(tags);
+    // });
 
+    this._tags.addAll( [
+      Tuple('a', false),
+      Tuple('b', false),
+      Tuple('c', false),
+      Tuple('d', false),
+      Tuple('e', false),
+      Tuple('f', false),
+    ]);
+  }
+
+  void _getTextForTags() {
+    String result = '';
+    if (this._tags.length == 0) {
+      result = 'Select tags';
+    } else {
+      this._tags.forEach((tag) {
+        if (tag.value) {
+          result += '${tag.key}, ';
+        }
+      });
+
+      if (result.isEmpty) {
+        result = 'Select tags';
+      } else {
+        result = result.substring(0, result.length - 2);
+      }
+    }
+
+    setState(() {
+      this._tagCaption = result;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final entryTitle = TextFormField(
       keyboardType: TextInputType.text,
       autofocus: false,
@@ -32,7 +77,7 @@ class _PostPageState extends State<PostPage> {
 
     final entryBody = TextFormField(
       autofocus: false,
-      maxLines: 15,      
+      maxLines: 15,
       decoration: InputDecoration(
         hintText: 'What do you want to share today?',
       ),
@@ -48,6 +93,7 @@ class _PostPageState extends State<PostPage> {
           IconButton(
             icon: Icon(Icons.send),
             onPressed: () {
+              // TODO: implement post method
               // this.client.postEntry().then((list) {
               //   setState(() {
               //     this._entries.clear();
@@ -66,37 +112,69 @@ class _PostPageState extends State<PostPage> {
             child: ListView(
               children: <Widget>[
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                  FlatButton(child: DateView(_date), onPressed: () {
-                    showDatePicker(
-                      context: context, 
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime.parse('1950-01-01 00:00:00.000'),
-                      lastDate: DateTime.parse('2150-01-01 00:00:00.000'),
-                    ).then((value) {
-                      setState(() {
-                        this._date = DateTime(value.year, value.month, value.day, this._date.hour, this._date.minute);                                              
-                      });
-                    });
-                  }),
-                  FlatButton(child: TimeView(_date), onPressed: () {
-                    showTimePicker(context: context, initialTime: TimeOfDay.now()).then((value) {
-                      setState(() {
-                        this._date = DateTime(this._date.year, this._date.month, this._date.day, value.hour, value.minute);                                              
-                      });
-                    });
-                  })
-                  ]
-                ),
-                entryTitle, 
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      FlatButton(
+                          child: DateView(_date),
+                          onPressed: () {
+                            showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate:
+                                  DateTime.parse('1950-01-01 00:00:00.000'),
+                              lastDate:
+                                  DateTime.parse('2150-01-01 00:00:00.000'),
+                            ).then((value) {
+                              if (value != null) {
+                                setState(() {
+                                  this._date = DateTime(
+                                      value.year,
+                                      value.month,
+                                      value.day,
+                                      this._date.hour,
+                                      this._date.minute);
+                                });
+                              }
+                            });
+                          }),
+                      FlatButton(
+                          child: TimeView(_date),
+                          onPressed: () {
+                            showTimePicker(
+                                    context: context,
+                                    initialTime: TimeOfDay.now())
+                                .then((value) {
+                              if (value != null) {
+                                setState(() {
+                                  this._date = DateTime(
+                                      this._date.year,
+                                      this._date.month,
+                                      this._date.day,
+                                      value.hour,
+                                      value.minute);
+                                });
+                              }
+                            });
+                          })
+                    ]),
+                entryTitle,
                 entryBody,
                 // TODO: add security selector
                 // TODO: add tag selector
+                FlatButton(
+                    child: Row(children: <Widget>[
+                      Icon(Icons.loyalty),
+                      Text(this._tagCaption)
+                    ]),
+                    onPressed: () {
+                      showCheckBoxList(context: context, title: 'Select Tags', options: this._tags)
+                        .then((v) {
+                          this._getTextForTags();
+                        });
+                    })
               ],
             ),
-          )
-        ),
+          )),
     );
   }
 }

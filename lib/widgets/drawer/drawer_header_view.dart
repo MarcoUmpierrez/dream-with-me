@@ -26,9 +26,11 @@ class DrawerHeaderView extends StatelessWidget {
                 backgroundImage: userPic,
                 backgroundColor: Colors.transparent,
                 radius: 25.0),
-
             // TODO: use a dropdown for multiple accounts
-            Text(userName, style: userNameStyle),
+            ListTile(                
+                title: Text(userName, style: userNameStyle),
+                trailing: Icon(Icons.expand_more, color: Colors.white)
+              )
           ],
         ),
         decoration: BoxDecoration(
