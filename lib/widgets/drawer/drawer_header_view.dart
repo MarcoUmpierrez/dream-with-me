@@ -8,13 +8,17 @@ class DrawerHeaderView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String fullUserName = this.user != null ? this.user.fullUserName : 'user name';
     String userName = this.user != null ? this.user.userName : 'user account';
     dynamic userPic = this.user != null && this.user.picURL.isNotEmpty
         ? NetworkImage(this.user.picURL)
         : AssetImage('images/user_logo.png');
 
-    final TextStyle userNameStyle =
+    final TextStyle titleStyle =
         TextStyle(color: Colors.white, fontWeight: FontWeight.bold);
+    
+    final TextStyle subTitleStyle =
+        TextStyle(color: Colors.white);
 
     return Container(
       child: DrawerHeader(
@@ -28,7 +32,8 @@ class DrawerHeaderView extends StatelessWidget {
                 radius: 25.0),
             // TODO: use a dropdown for multiple accounts
             ListTile(                
-                title: Text(userName, style: userNameStyle),
+                title: Text(fullUserName, style: titleStyle),
+                subtitle: Text(userName, style: subTitleStyle),
                 trailing: Icon(Icons.expand_more, color: Colors.white)
               )
           ],

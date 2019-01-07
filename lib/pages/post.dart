@@ -1,4 +1,5 @@
 import 'package:dreamwithme/clients/dreamwidth.dart';
+import 'package:dreamwithme/models/tag.dart';
 import 'package:dreamwithme/utils/tuple.dart';
 import 'package:dreamwithme/widgets/date_view.dart';
 import 'package:dreamwithme/widgets/dialogs/checkbox_list.dart';
@@ -26,19 +27,12 @@ class _PostPageState extends State<PostPage> {
   @override
   void initState(){
     super.initState();
-    // TODO: implement request for tags
-    // widget.client.getTags().then((tags) {
-    //   this._tags.addAll(tags);
-    // });
-
-    this._tags.addAll( [
-      Tuple('a', false),
-      Tuple('b', false),
-      Tuple('c', false),
-      Tuple('d', false),
-      Tuple('e', false),
-      Tuple('f', false),
-    ]);
+    widget.client.getUserTags().then((List<Tag> tags) {
+      tags.sort((a, b) => a.name.compareTo(b.name));
+      tags.forEach((Tag tag) {
+        this._tags.add(Tuple<String, bool>(tag.name, false));
+      });
+    });
   }
 
   void _getTextForTags() {

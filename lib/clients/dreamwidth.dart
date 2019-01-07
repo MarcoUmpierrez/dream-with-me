@@ -2,10 +2,13 @@ import 'package:dreamwithme/clients/xml_rpc.dart';
 import 'package:dreamwithme/models/challenge.dart';
 import 'package:dreamwithme/models/account.dart';
 import 'package:dreamwithme/models/entry.dart';
+import 'package:dreamwithme/models/tag.dart';
 import 'package:dreamwithme/models/xml_param.dart';
 import 'package:dreamwithme/models/xml_params/xml_int.dart';
 import 'package:dreamwithme/models/xml_params/xml_string.dart';
 import 'package:dreamwithme/utils/md5.dart';
+import 'package:dreamwithme/utils/method_names.dart';
+import 'package:dreamwithme/utils/parameter_names.dart';
 
 class DreamWidthClient {
   XMLRPCClient client;
@@ -17,12 +20,6 @@ class DreamWidthClient {
     this.client = XMLRPCClient();
   }
 
-  void _addAccount(String userName, String password) {
-    Account user = Account(userName, password);
-    this.users.add(user);
-    this.currentUser = user;
-  }
-
   void logOut() {
     this.users.remove(this.currentUser);
     if (this.users.length > 0) {
@@ -32,91 +29,127 @@ class DreamWidthClient {
 
   // Get challenge auth token
   Future<Challenge> getChallenge() async {
-    Map<String, XmlParam> data = await client.xmlRpcRequest('getchallenge');
-    return Challenge(
-      data['challenge'].getValue(),
-      authScheme: data['auth_scheme'].getValue(),
-      expireTime: data['expire_time'].getValue(),
-      serverTime: data['server_time'].getValue(),
-    );
+    try {
+      Map<String, XmlParam> parameters = await client.xmlRpcRequest(MethodNames.GetChallenge);
+      
+      if (parameters.length > 0) {
+        return Challenge(parameters[ChallengeParams.Challenge].getValue(),
+        authScheme: parameters[ChallengeParams.AuthScheme].getValue(),
+        expireTime: parameters[ChallengeParams.ExpireTime].getValue(),
+        serverTime: parameters[ChallengeParams.ServerTime].getValue());    
+      }
+    } catch (e) {
+      assert(false, 'Challenge request failed');
+    }
+
+    return null;    
   }
 
   // Generic method
   Future<Map<String, XmlParam>> _methodCall(String methodName, {Map<String, XmlParam> params}) async {
     Challenge data = await this.getChallenge();
 
-    if (params == null) {
-      params = {};
+    if (data != null) {
+      if (params == null) {
+        params = {};
+      }
+
+      params.addAll({
+        AuthParams.AuthChallenge: XmlString(data.challenge),
+        AuthParams.AuthResponse: XmlString(generateMd5(data.challenge + this.currentUser.password)),
+        AuthParams.UserName: XmlString(this.currentUser.userName),
+        AuthParams.AuthMethod: XmlString(ChallengeParams.Challenge),
+      });
+
+      return client.xmlRpcRequest(methodName, params);
     }
 
-    params.addAll({
-      'auth_challenge': XmlString(data.challenge),
-      'auth_response': XmlString(generateMd5(data.challenge + this.currentUser.password)),
-      'username': XmlString(this.currentUser.userName),
-      'auth_method': XmlString('challenge'),
-    });
-
-    return client.xmlRpcRequest(methodName, params);
+    return null;
   }
 
   Future<bool> login(String userName, String password) async {
-    this._addAccount(userName, password);
-    Map<String, XmlParam> data = await this._methodCall('login', params: {
-      'getpickws': XmlInt('1'),
-      'getpickwurls': XmlInt('1'),
-    });
+    Account oldUser = this.currentUser;
+    this.currentUser = Account(userName, password);
 
-    this.currentUser.picURL = data['defaultpicurl'].getValue();
-    return true;
+    try {
+      Map<String, XmlParam> parameters = await this._methodCall(MethodNames.Login, params: {
+        // for now, I don't worry about retrieving other picURLs than the default one
+        LoginParams.GetPickWS: XmlInt('1'),
+        LoginParams.GetPickWURLS: XmlInt('1'),
+      });
+
+      if (parameters.length > 0) {
+        this.currentUser
+        ..userId = parameters[LoginParams.UserId].getValue()
+        ..fullUserName = parameters[LoginParams.FullName].getValue()
+        ..picURL = parameters[LoginParams.DefaultPicURL].getValue();
+
+        this.users.add(this.currentUser);
+
+        return true;
+      }    
+    } catch (e) {
+      assert(false, 'Login request failed');
+    }
+    
+    this.currentUser = oldUser;
+    return false;
+  }
+
+  Future<List<Tag>> getUserTags() async {
+    try {
+      Map<String, XmlParam> parameters = await this._methodCall(MethodNames.GetUserTags);
+
+      List<Tag> tagList;
+      parameters[UserTagsParams.Tags].getValue().forEach((Map<String, XmlParam> tag) {
+        if (tagList == null) {
+          tagList = [];
+        }
+
+        // for now I don't worry about the number of times a tag has been used in
+        // the different security modes (property: security)
+        tagList.add(Tag(
+          tag[UserTagsParams.Display].getValue(),
+          tag[UserTagsParams.SecurityLevel].getValue(),
+          tag[UserTagsParams.Name].getValue(),
+          tag[UserTagsParams.Uses].getValue())
+        );
+      });
+
+      return tagList;
+    } catch (e) {
+      assert(false, 'User Tags request failed');
+    }
+
+    return null;
   }
 
   Future<List<Entry>> getReadPage() async {
-    Map<String, XmlParam> data = await this._methodCall('getreadpage');
-    XmlParam entryArray = data['entries'];
-    List<Map<String, XmlParam>> entries = entryArray.getValue();
-    List<Entry> list = [];
+    try {      
+      Map<String, XmlParam> parameters = await this._methodCall(MethodNames.GetReadPage);
 
-    if (entries.isNotEmpty) {
-      entries.forEach((entry) {
+      List<Entry> list = [];
+      parameters[ReadPageParams.Entries].getValue().forEach((Map<String, XmlParam> entry) {
         Entry post = Entry();
-        entry.forEach((key, value) {
-          switch (key) {
-            case 'journalname':
-              post.journalName = value.getValue();
-              break;
-            case 'logtime':
-              post.logTime = value.getValue();
-              break;
-            case 'ditemid':
-              post.itemId = value.getValue();
-              break;
-            case 'postername':
-              post.posterName = value.getValue();
-              break;
-            case 'security':
-              post.security = value.getValue();
-              break;
-            case 'postertype':
-              post.posterType = value.getValue();
-              break;
-            case 'event_raw':
-              post.eventRaw = value.getValue();
-              break;
-            case 'subject_raw':
-              post.subjectRaw = value.getValue();
-              break;
-            case 'journaltype':
-              post.journalType = value.getValue();
-              break;
-            default:
-              print('Invalid property name for $key');
-          }
-        });
+        post
+        ..journalName = entry[ReadPageParams.JournalName].getValue()
+        ..logTime = entry[ReadPageParams.LogTime].getValue()
+        ..itemId = entry[ReadPageParams.DItemId].getValue()
+        ..posterName = entry[ReadPageParams.PosterName].getValue()
+        ..security = entry[ReadPageParams.Security].getValue()
+        ..posterType = entry[ReadPageParams.PosterType].getValue()
+        ..eventRaw = entry[ReadPageParams.EventRaw].getValue()
+        ..subjectRaw = entry[ReadPageParams.SubjectRaw].getValue()
+        ..journalType = entry[ReadPageParams.JournalType].getValue();
 
         list.add(post);
       });
+
+      return list;
+    } catch (e) {
+      assert(false, 'Read Page request failed');
     }
 
-    return list;
+    return null;
   }
 }
