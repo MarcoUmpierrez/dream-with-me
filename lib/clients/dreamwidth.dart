@@ -1,4 +1,4 @@
-import 'package:dreamwithme/clients/xml_rpc.dart';
+import 'dart:convert';
 import 'package:dreamwithme/models/challenge.dart';
 import 'package:dreamwithme/models/account.dart';
 import 'package:dreamwithme/models/entry.dart';
@@ -6,18 +6,29 @@ import 'package:dreamwithme/models/tag.dart';
 import 'package:dreamwithme/models/xml_param.dart';
 import 'package:dreamwithme/models/xml_params/xml_int.dart';
 import 'package:dreamwithme/models/xml_params/xml_string.dart';
+import 'package:dreamwithme/utils/decoder_xml.dart';
+import 'package:dreamwithme/utils/encoder_xml.dart';
 import 'package:dreamwithme/utils/md5.dart';
 import 'package:dreamwithme/utils/method_names.dart';
 import 'package:dreamwithme/utils/parameter_names.dart';
+import 'package:http/http.dart';
+import 'package:xml/xml.dart';
 
 class DreamWidthClient {
-  XMLRPCClient client;
+  final String host = 'www.dreamwidth.org';
+  final String path = '/interface/xmlrpc';
+  final String methodUrl = 'LJ.XMLRPC';
+  Client client;
+  DecoderXml decoder;
+  EncoderXml encoder;
   List<Account> users;
   Account currentUser;
 
   DreamWidthClient() {
     this.users = [];
-    this.client = XMLRPCClient();
+    this.client = Client();
+    this.decoder = DecoderXml();
+    this.encoder = EncoderXml();
   }
 
   void logOut() {
@@ -27,10 +38,28 @@ class DreamWidthClient {
     }
   }
 
+  Future<Map<String, XmlParam>> xmlRpcRequest(String methodName, [Map<String, XmlParam> params]) async {
+    final String body = this.encoder.generateXML('$methodUrl.$methodName', params).toXmlString();
+    final Map<String, String> headers = <String, String>{'Content-Type': 'text/xml'};
+
+    Response response = await client.post(
+      'https://$host$path',
+      headers: headers, 
+      body: body, 
+      encoding: utf8
+    );
+
+    if (response.statusCode == 200) {
+      return this.decoder.decoderXml(parse(response.body));
+    } else {
+      return new Future.error(response);
+    }
+  }
+
   // Get challenge auth token
   Future<Challenge> getChallenge() async {
     try {
-      Map<String, XmlParam> parameters = await client.xmlRpcRequest(MethodNames.GetChallenge);
+      Map<String, XmlParam> parameters = await this.xmlRpcRequest(MethodNames.GetChallenge);
       
       if (parameters.length > 0) {
         return Challenge(parameters[ChallengeParams.Challenge].getValue(),
@@ -61,7 +90,7 @@ class DreamWidthClient {
         AuthParams.AuthMethod: XmlString(ChallengeParams.Challenge),
       });
 
-      return client.xmlRpcRequest(methodName, params);
+      return this.xmlRpcRequest(methodName, params);
     }
 
     return null;
