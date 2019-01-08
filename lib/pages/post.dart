@@ -21,6 +21,9 @@ class _PostPageState extends State<PostPage> {
   DateTime _date = DateTime.now();
   List<Tuple<String, bool>> _tags = [];
   String _tagCaption = 'Select tags';
+  String _security;
+  List<String> _securityOptions = ['Public', 'Friends', 'Private'];
+  List<DropdownMenuItem<String>> _securityDropDown;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -33,9 +36,13 @@ class _PostPageState extends State<PostPage> {
         this._tags.add(Tuple<String, bool>(tag.name, false));
       });
     });
+
+    this._securityDropDown = [];
+    this._securityOptions.forEach((String option) => this._securityDropDown.add(DropdownMenuItem(value: option, child: Text(option))));
+    this._security = this._securityDropDown[0].value;
   }
 
-  void _getTextForTags() {
+  void _updateTags() {
     String result = '';
     if (this._tags.length == 0) {
       result = 'Select tags';
@@ -89,7 +96,7 @@ class _PostPageState extends State<PostPage> {
             onPressed: () {
               this._formKey.currentState.save();
               widget.client
-                  .post(this._title, this._body, this._tagCaption, 'security', this._date)
+                  .post(this._title, this._body, this._tagCaption, this._security, this._date)
                   .then((isSuccessful) {
                     if (isSuccessful) {
                       print('RESULT: Entry successfully published');
@@ -156,7 +163,6 @@ class _PostPageState extends State<PostPage> {
                     ]),
                 entryTitle,
                 entryBody,
-                // TODO: add security selector
                 FlatButton(
                     child: Row(children: <Widget>[
                       Icon(Icons.loyalty),
@@ -168,9 +174,26 @@ class _PostPageState extends State<PostPage> {
                               title: 'Select Tags',
                               options: this._tags)
                           .then((_) {
-                        this._getTextForTags();
+                        this._updateTags();
                       });
-                    })
+                    }),
+                    Container(
+                      padding: EdgeInsets.fromLTRB(15.0, 0.0, 0.0, 0.0),
+                      child: Row(
+                        children: <Widget>[
+                          Icon(Icons.lock),
+                          DropdownButton(
+                            value: this._security,
+                            items: this._securityDropDown,
+                            style: TextStyle(color: Colors.black, fontSize: 14.0),
+                            onChanged: (String value) {
+                              setState(() {
+                                this._security = value;
+                              });
+                            },
+                          )
+                    ],),)
+                    
               ],
             ),
           )),

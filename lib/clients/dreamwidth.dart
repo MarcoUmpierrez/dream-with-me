@@ -221,19 +221,36 @@ class DreamWidthClient {
     return null;
   }
 
-  Future<bool> post(String title, String body, String tags, String security, DateTime date) async {
+  Future<bool> post(String title, String body, String tags, String access, DateTime date) async {
     try {      
       XmlStruct props = XmlStruct();
       props.items.addAll({
         PostEventParams.TagList: XmlString(tags)
       });
 
+      XmlString allowMask, security;
+      switch (access){
+        case 'Private':
+          security = XmlString('private');
+          allowMask = XmlString('');
+          break;
+        case 'friends':
+          security = XmlString('usemask');
+          allowMask = XmlString('00000000000000000000000000000001');
+          break;
+        default:
+          security = XmlString('public');
+          allowMask = XmlString('');
+          break;
+        };
+      
+
       Map<String, XmlParam> parameters = await this._methodCall(MethodNames.PostEvent, params: {
         PostEventParams.Subject: XmlString(title),
         PostEventParams.Event: XmlString(body),
         PostEventParams.Lineendings: XmlString('pc'),
-        PostEventParams.Security: XmlString('private'),
-        PostEventParams.AllowMask: XmlString(''),
+        PostEventParams.Security: security,
+        PostEventParams.AllowMask: allowMask,
         PostEventParams.Year: XmlString(date.year.toString()),
         PostEventParams.Mon: XmlString(date.month.toString()),
         PostEventParams.Day: XmlString(date.day.toString()),
