@@ -2,6 +2,10 @@
 
 Flutter client for [Dreamwidth.org](https://dreamwidth.org)
 
+## Screenshots
+
+![Preview](screenshot/preview.png)
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
