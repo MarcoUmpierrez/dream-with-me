@@ -41,3 +41,21 @@ class ReadPageParams {
   static const String SubjectRaw = 'subject_raw';
   static const String JournalType = 'journaltype';
 }
+
+class PostEventParams {
+  static const String Subject = 'subject';
+  static const String Event = 'event';
+  static const String Lineendings = 'lineendings';
+  static const String Security = 'security';
+  static const String AllowMask = 'allowmask';
+  static const String Year = 'year';
+  static const String Mon = 'mon';
+  static const String Day = 'day';
+  static const String Hour = 'hour';
+  static const String Min = 'min';
+  static const String Props = 'props';
+  static const String TagList = 'taglist';
+  static const String ItemId = 'itemid';
+  static const String Anum = 'anum';
+  static const String Url = 'url';
+}

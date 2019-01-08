@@ -25,7 +25,7 @@ class _PostPageState extends State<PostPage> {
   final _formKey = GlobalKey<FormState>();
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     widget.client.getUserTags().then((List<Tag> tags) {
       tags.sort((a, b) => a.name.compareTo(b.name));
@@ -66,7 +66,7 @@ class _PostPageState extends State<PostPage> {
       decoration: InputDecoration(
         hintText: 'Entry Title',
       ),
-      onSaved: (value) => _title = value,
+      onSaved: (value) => this._title = value,
     );
 
     final entryBody = TextFormField(
@@ -76,7 +76,7 @@ class _PostPageState extends State<PostPage> {
         hintText: 'What do you want to share today?',
       ),
       keyboardType: TextInputType.multiline,
-      onSaved: (value) => _body = value,
+      onSaved: (value) => this._body = value,
     );
 
     return Scaffold(
@@ -87,14 +87,19 @@ class _PostPageState extends State<PostPage> {
           IconButton(
             icon: Icon(Icons.send),
             onPressed: () {
-              // TODO: implement post method
-              // this.client.postEntry().then((list) {
-              //   setState(() {
-              //     this._entries.clear();
-              //     this._entries.addAll(list);
-              //     this._isLoading = false;
-              //   });
-              // });
+              this._formKey.currentState.save();
+              widget.client
+                  .post(this._title, this._body, this._tagCaption, 'security', this._date)
+                  .then((isSuccessful) {
+                    if (isSuccessful) {
+                      print('RESULT: Entry successfully published');
+                      Navigator.pop(context);                      
+                    } else {
+                      print('RESULT: Entry not published');
+                      Scaffold.of(context).showSnackBar(
+                          SnackBar(content: Text('Entry not published')));
+                    }
+                  });
             },
           )
         ],
@@ -114,10 +119,8 @@ class _PostPageState extends State<PostPage> {
                             showDatePicker(
                               context: context,
                               initialDate: DateTime.now(),
-                              firstDate:
-                                  DateTime.parse('1950-01-01 00:00:00.000'),
-                              lastDate:
-                                  DateTime.parse('2150-01-01 00:00:00.000'),
+                              firstDate: DateTime.parse('1950-01-01 00:00:00.000'),
+                              lastDate: DateTime.parse('2150-01-01 00:00:00.000'),
                             ).then((value) {
                               if (value != null) {
                                 setState(() {
@@ -154,17 +157,19 @@ class _PostPageState extends State<PostPage> {
                 entryTitle,
                 entryBody,
                 // TODO: add security selector
-                // TODO: add tag selector
                 FlatButton(
                     child: Row(children: <Widget>[
                       Icon(Icons.loyalty),
                       Text(this._tagCaption)
                     ]),
                     onPressed: () {
-                      showCheckBoxList(context: context, title: 'Select Tags', options: this._tags)
-                        .then((v) {
-                          this._getTextForTags();
-                        });
+                      showCheckBoxList(
+                              context: context,
+                              title: 'Select Tags',
+                              options: this._tags)
+                          .then((_) {
+                        this._getTextForTags();
+                      });
                     })
               ],
             ),

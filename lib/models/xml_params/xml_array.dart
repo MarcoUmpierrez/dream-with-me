@@ -14,8 +14,31 @@ class XmlArray implements XmlParam {
 
   @override
   XmlElement getXmlValue() {   
-    // TODO: implement XmlElement for an array
-    // return XmlElement(XmlName('array'), [], [XmlText(this.value)]);
-    return null;
+    return XmlElement(XmlName('array'), [], [
+      XmlElement(XmlName('data'), [], this._getXmlValues())
+    ]);
+  }
+
+  List<XmlElement> _getXmlValues() {
+    List<XmlElement> list = [];
+    this.items.forEach((Map<String, XmlParam> members) {
+      list.add(XmlElement(XmlName('value'), [], [
+        XmlElement(XmlName('struct'), [], this._getXmlMembers(members))
+      ]));
+    });
+
+    return list;
+  }
+
+  List<XmlElement> _getXmlMembers(Map<String, XmlParam> params) {
+    List<XmlElement> memberList = [];
+    if (params != null && params.isNotEmpty) {
+      params.forEach((key, value) => memberList.add(XmlElement(XmlName('member'), [], [
+                XmlElement(XmlName('name'), [], [XmlText(key)]),
+                XmlElement(XmlName('value'), [], [value.getXmlValue()])
+              ])));
+    }
+
+    return memberList;
   }
 }

@@ -6,6 +6,7 @@ import 'package:dreamwithme/models/tag.dart';
 import 'package:dreamwithme/models/xml_param.dart';
 import 'package:dreamwithme/models/xml_params/xml_int.dart';
 import 'package:dreamwithme/models/xml_params/xml_string.dart';
+import 'package:dreamwithme/models/xml_params/xml_struct.dart';
 import 'package:dreamwithme/utils/decoder_xml.dart';
 import 'package:dreamwithme/utils/encoder_xml.dart';
 import 'package:dreamwithme/utils/md5.dart';
@@ -29,6 +30,22 @@ class DreamWidthClient {
     this.client = Client();
     this.decoder = DecoderXml();
     this.encoder = EncoderXml();
+  }
+
+  bool _containsKeys(Map<String, XmlParam> parameters, List<String> keys) {
+    bool result = true;
+
+    if (parameters == null || parameters.isEmpty) {
+      return false;
+    }
+
+    keys.forEach((String key) {
+      if (!parameters.containsKey(key)) {
+        result = false;
+      }
+    });
+
+    return result;
   }
 
   void logOut() {
@@ -61,11 +78,18 @@ class DreamWidthClient {
     try {
       Map<String, XmlParam> parameters = await this.xmlRpcRequest(MethodNames.GetChallenge);
       
-      if (parameters.length > 0) {
+      if (this._containsKeys(parameters, [
+          ChallengeParams.Challenge, 
+          ChallengeParams.AuthScheme,
+          ChallengeParams.ExpireTime,
+          ChallengeParams.ServerTime
+        ])) {
         return Challenge(parameters[ChallengeParams.Challenge].getValue(),
         authScheme: parameters[ChallengeParams.AuthScheme].getValue(),
         expireTime: parameters[ChallengeParams.ExpireTime].getValue(),
         serverTime: parameters[ChallengeParams.ServerTime].getValue());    
+      } else {
+        return null;
       }
     } catch (e) {
       assert(false, 'Challenge request failed');
@@ -107,7 +131,11 @@ class DreamWidthClient {
         LoginParams.GetPickWURLS: XmlInt('1'),
       });
 
-      if (parameters.length > 0) {
+      if (this._containsKeys(parameters, [
+          LoginParams.UserId, 
+          LoginParams.FullName,
+          LoginParams.DefaultPicURL
+        ])) {
         this.currentUser
         ..userId = parameters[LoginParams.UserId].getValue()
         ..fullUserName = parameters[LoginParams.FullName].getValue()
@@ -116,7 +144,9 @@ class DreamWidthClient {
         this.users.add(this.currentUser);
 
         return true;
-      }    
+      } else {
+        return false;
+      }  
     } catch (e) {
       assert(false, 'Login request failed');
     }
@@ -137,12 +167,21 @@ class DreamWidthClient {
 
         // for now I don't worry about the number of times a tag has been used in
         // the different security modes (property: security)
-        tagList.add(Tag(
-          tag[UserTagsParams.Display].getValue(),
-          tag[UserTagsParams.SecurityLevel].getValue(),
-          tag[UserTagsParams.Name].getValue(),
-          tag[UserTagsParams.Uses].getValue())
-        );
+        if (this._containsKeys(tag, [
+          UserTagsParams.Display, 
+          UserTagsParams.SecurityLevel, 
+          UserTagsParams.Name, 
+          UserTagsParams.Uses
+        ])) {
+            tagList.add(Tag(
+              tag[UserTagsParams.Display].getValue(),
+              tag[UserTagsParams.SecurityLevel].getValue(),
+              tag[UserTagsParams.Name].getValue(),
+              tag[UserTagsParams.Uses].getValue())
+            );
+        } else {
+          return null;
+        }
       });
 
       return tagList;
@@ -180,5 +219,39 @@ class DreamWidthClient {
     }
 
     return null;
+  }
+
+  Future<bool> post(String title, String body, String tags, String security, DateTime date) async {
+    try {      
+      XmlStruct props = XmlStruct();
+      props.items.addAll({
+        PostEventParams.TagList: XmlString(tags)
+      });
+
+      Map<String, XmlParam> parameters = await this._methodCall(MethodNames.PostEvent, params: {
+        PostEventParams.Subject: XmlString(title),
+        PostEventParams.Event: XmlString(body),
+        PostEventParams.Lineendings: XmlString('pc'),
+        PostEventParams.Security: XmlString('private'),
+        PostEventParams.AllowMask: XmlString(''),
+        PostEventParams.Year: XmlString(date.year.toString()),
+        PostEventParams.Mon: XmlString(date.month.toString()),
+        PostEventParams.Day: XmlString(date.day.toString()),
+        PostEventParams.Hour: XmlString(date.hour.toString()),
+        PostEventParams.Min: XmlString(date.minute.toString()),
+        PostEventParams.Props: props
+      });
+
+      if (this._containsKeys(parameters, [
+          PostEventParams.ItemId, 
+          PostEventParams.Anum
+        ])) {
+        return true;
+      }
+    } catch (e) {
+      assert(false, 'Post request failed');
+    }
+
+    return false;
   }
 }
