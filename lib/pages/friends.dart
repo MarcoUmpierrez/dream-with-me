@@ -23,18 +23,23 @@ class _FriendsPageState extends State<FriendsPage> {
     this._entries = [];   
   }
 
+  void _getEntries() {
+    widget.client.getReadPage().then((list) {
+      assert(list != null, 'Friend Page: list of entries null');
+      setState(() {
+        this._entries.clear();
+        this._entries.addAll(list);
+        this._isLoading = false;
+      });
+    });
+  }
+
   @override
   didChangeDependencies() {
     super.didChangeDependencies();
 
     if (widget != null) {
-      widget.client.getReadPage().then((list) {
-        setState(() {
-          this._entries.clear();
-          this._entries.addAll(list);
-          this._isLoading = false;
-        });
-      });
+      this._getEntries();
     }
   }
 
@@ -52,13 +57,7 @@ class _FriendsPageState extends State<FriendsPage> {
           IconButton(
             icon: Icon(Icons.refresh),
             onPressed: () {    
-              widget.client.getReadPage().then((list) {
-                setState(() {
-                  this._entries.clear();
-                  this._entries.addAll(list);
-                  this._isLoading = false;
-                });
-              });
+             this._getEntries();
             },
           )
         ],

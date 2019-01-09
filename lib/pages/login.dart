@@ -13,7 +13,20 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  String _user, _pwd;
+  String _user, _pwd; 
+
+  final _formKey = GlobalKey<FormState>();
+
+  void _logIn(GlobalKey<FormState> formKey) {
+   if (formKey.currentState.validate()) {
+      formKey.currentState.save();
+      widget.client.login(_user, _pwd).then((isLogged) {
+        if (isLogged) {
+          Navigator.of(context).pushReplacementNamed(FriendsPage.tag);
+        }
+      });
+    }  
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +37,6 @@ class _LoginPageState extends State<LoginPage> {
         child: Image.asset('images/dreamwithme.png'),
       ),
     );
-
-
-    final _formKey = GlobalKey<FormState>();
 
     final email = TextFormField(
       keyboardType: TextInputType.emailAddress,
@@ -58,6 +68,9 @@ class _LoginPageState extends State<LoginPage> {
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(5.0)),
       ),
+      onFieldSubmitted: (_) {
+        this._logIn(_formKey);
+      },
       validator: (value) {
         if (value.isEmpty) {
           return 'Password cannot be empty';
@@ -72,17 +85,7 @@ class _LoginPageState extends State<LoginPage> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(5),
         ),
-        onPressed: () {
-          if (_formKey.currentState.validate()) {
-            _formKey.currentState.save();
-            widget.client.login(_user, _pwd).then((isLogged) {
-              if (isLogged) {
-                Navigator.of(context).pushReplacementNamed(FriendsPage.tag);
-                // Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (BuildContext context) => HomePage(DreamWidthAPI(_user, _pwd))));
-              }
-            });
-          }        
-        },
+        onPressed: () => this._logIn(_formKey),
         padding: EdgeInsets.all(12),
         color: Colors.black,
         child: Text('Log In', style: TextStyle(color: Colors.white)),

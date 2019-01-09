@@ -24,6 +24,7 @@ class DreamWidthClient {
   EncoderXml encoder;
   List<Account> users;
   Account currentUser;
+  Challenge challenge;
 
   DreamWidthClient() {
     this.users = [];
@@ -92,7 +93,7 @@ class DreamWidthClient {
         return null;
       }
     } catch (e) {
-      assert(false, 'Challenge request failed');
+      print('Challenge request failed');
     }
 
     return null;    
@@ -100,16 +101,20 @@ class DreamWidthClient {
 
   // Generic method
   Future<Map<String, XmlParam>> _methodCall(String methodName, {Map<String, XmlParam> params}) async {
-    Challenge data = await this.getChallenge();
+    
+    // reuse challenge if it's not expired
+    if (this.challenge == null || this.challenge.isExpired()) {
+      this.challenge = await this.getChallenge();
+    }     
 
-    if (data != null) {
+    if (this.challenge != null) {
       if (params == null) {
         params = {};
       }
 
       params.addAll({
-        AuthParams.AuthChallenge: XmlString(data.challenge),
-        AuthParams.AuthResponse: XmlString(generateMd5(data.challenge + this.currentUser.password)),
+        AuthParams.AuthChallenge: XmlString(this.challenge.challenge),
+        AuthParams.AuthResponse: XmlString(generateMd5(this.challenge.challenge + this.currentUser.password)),
         AuthParams.UserName: XmlString(this.currentUser.userName),
         AuthParams.AuthMethod: XmlString(ChallengeParams.Challenge),
       });
@@ -129,6 +134,7 @@ class DreamWidthClient {
         // for now, I don't worry about retrieving other picURLs than the default one
         LoginParams.GetPickWS: XmlInt('1'),
         LoginParams.GetPickWURLS: XmlInt('1'),
+        LoginParams.Ver: XmlInt('1')
       });
 
       if (this._containsKeys(parameters, [
@@ -148,7 +154,7 @@ class DreamWidthClient {
         return false;
       }  
     } catch (e) {
-      assert(false, 'Login request failed');
+      print('Login request failed');
     }
     
     this.currentUser = oldUser;
@@ -157,7 +163,9 @@ class DreamWidthClient {
 
   Future<List<Tag>> getUserTags() async {
     try {
-      Map<String, XmlParam> parameters = await this._methodCall(MethodNames.GetUserTags);
+      Map<String, XmlParam> parameters = await this._methodCall(MethodNames.GetUserTags, params: {        
+        UserTagsParams.Ver: XmlInt('1')
+      });
 
       List<Tag> tagList;
       parameters[UserTagsParams.Tags].getValue().forEach((Map<String, XmlParam> tag) {
@@ -186,7 +194,7 @@ class DreamWidthClient {
 
       return tagList;
     } catch (e) {
-      assert(false, 'User Tags request failed');
+      print('User Tags request failed');
     }
 
     return null;
@@ -215,7 +223,7 @@ class DreamWidthClient {
 
       return list;
     } catch (e) {
-      assert(false, 'Read Page request failed');
+      print('Read Page request failed');
     }
 
     return null;
@@ -225,7 +233,7 @@ class DreamWidthClient {
     try {      
       XmlStruct props = XmlStruct();
       props.items.addAll({
-        PostEventParams.TagList: XmlString(tags)
+        PostEventParams.TagList: XmlString(tags?? '')
       });
 
       XmlString allowMask, security;
@@ -236,6 +244,7 @@ class DreamWidthClient {
           break;
         case 'friends':
           security = XmlString('usemask');
+          // 30 bits for the different groups being the first one just for friends
           allowMask = XmlString('00000000000000000000000000000001');
           break;
         default:
@@ -246,9 +255,10 @@ class DreamWidthClient {
       
 
       Map<String, XmlParam> parameters = await this._methodCall(MethodNames.PostEvent, params: {
+        PostEventParams.Ver: XmlInt('1'),
         PostEventParams.Subject: XmlString(title),
         PostEventParams.Event: XmlString(body),
-        PostEventParams.Lineendings: XmlString('pc'),
+        PostEventParams.Lineendings: XmlString('unix'),
         PostEventParams.Security: security,
         PostEventParams.AllowMask: allowMask,
         PostEventParams.Year: XmlString(date.year.toString()),
@@ -266,7 +276,7 @@ class DreamWidthClient {
         return true;
       }
     } catch (e) {
-      assert(false, 'Post request failed');
+      print('Post request failed');
     }
 
     return false;

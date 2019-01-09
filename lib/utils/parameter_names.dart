@@ -18,6 +18,7 @@ class LoginParams {
   static const String DefaultPicURL = 'defaultpicurl';
   static const String GetPickWS = 'getpickws';
   static const String GetPickWURLS = 'getpickwurls';
+  static const String Ver = 'ver';
   
 }
 
@@ -27,6 +28,7 @@ class UserTagsParams {
   static const String SecurityLevel = 'security_level';
   static const String Name = 'name';
   static const String Uses = 'uses';
+  static const String Ver = 'ver';
 }
 
 class ReadPageParams {
@@ -43,6 +45,7 @@ class ReadPageParams {
 }
 
 class PostEventParams {
+  static const String Ver = 'ver';
   static const String Subject = 'subject';
   static const String Event = 'event';
   static const String Lineendings = 'lineendings';
