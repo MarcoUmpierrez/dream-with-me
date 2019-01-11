@@ -5,4 +5,5 @@ class MethodNames {
   static const String Login = "login";
   static const String PostEvent = "postevent";
   static const String GetInbox = "getinbox";
+  static const String GetEvents = "getevents";
 }

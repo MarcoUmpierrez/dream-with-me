@@ -1,4 +1,4 @@
-import 'package:dreamwithme/clients/dreamwidth.dart';
+import 'package:dreamwithme/main.dart';
 import 'package:dreamwithme/models/tag.dart';
 import 'package:dreamwithme/utils/tuple.dart';
 import 'package:dreamwithme/widgets/date_view.dart';
@@ -8,9 +8,8 @@ import 'package:flutter/material.dart';
 
 class PostPage extends StatefulWidget {
   static String tag = 'post-page';
-  final DreamWidthClient client;
 
-  const PostPage({Key key, this.client}) : super(key: key);
+  const PostPage({Key key}) : super(key: key);
 
   @override
   _PostPageState createState() => new _PostPageState();
@@ -30,7 +29,7 @@ class _PostPageState extends State<PostPage> {
   @override
   void initState() {
     super.initState();
-    widget.client.getUserTags().then((List<Tag> tags) {
+    DreamWithMe.client.getUserTags().then((List<Tag> tags) {
       tags.sort((a, b) => a.name.compareTo(b.name));
       tags.forEach((Tag tag) {
         this._tags.add(Tuple<String, bool>(tag.name, false));
@@ -95,7 +94,7 @@ class _PostPageState extends State<PostPage> {
             icon: Icon(Icons.send),
             onPressed: () {
               this._formKey.currentState.save();
-              widget.client
+              DreamWithMe.client
                   .post(this._title, this._body, this._tagCaption, this._security, this._date)
                   .then((isSuccessful) {
                     if (isSuccessful) {

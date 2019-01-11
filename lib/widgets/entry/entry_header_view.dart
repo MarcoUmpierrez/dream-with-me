@@ -1,4 +1,5 @@
 import 'package:dreamwithme/models/entry.dart';
+import 'package:dreamwithme/pages/journal.dart';
 import 'package:dreamwithme/widgets/date_view.dart';
 import 'package:flutter/material.dart';
 
@@ -24,14 +25,17 @@ class EntryHeaderView extends StatelessWidget {
         child: Column(
           children: <Widget>[
             Container(
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text(this.entry.posterName, style: posterInfo),
-                    Text(this.entry.journalName, style: posterInfo),
-                  ]),
+              child: ListTile(
+                trailing: Text(this.entry.posterName, style: posterInfo),
+                leading: Text(this.entry.journalName, style: posterInfo),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => JournalPage(userName: this.entry.posterName))
+                  );
+                },
+              ),
               decoration: BoxDecoration(color: Theme.of(context).primaryColor),
-              padding: EdgeInsets.all(10.0),
+              margin: EdgeInsets.fromLTRB(0, 0, 0, 5.0),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

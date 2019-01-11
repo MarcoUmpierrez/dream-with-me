@@ -1,12 +1,11 @@
-import 'package:dreamwithme/clients/dreamwidth.dart';
-import 'package:dreamwithme/pages/friends.dart';
+import 'package:dreamwithme/main.dart';
+import 'package:dreamwithme/pages/journal.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';
-  final DreamWidthClient client;
   
-  const LoginPage({ Key key, this.client}) : super(key: key);
+  const LoginPage({ Key key}) : super(key: key);
 
   @override
   _LoginPageState createState() => new _LoginPageState();
@@ -20,9 +19,9 @@ class _LoginPageState extends State<LoginPage> {
   void _logIn(GlobalKey<FormState> formKey) {
    if (formKey.currentState.validate()) {
       formKey.currentState.save();
-      widget.client.login(_user, _pwd).then((isLogged) {
+      DreamWithMe.client.login(_user, _pwd).then((isLogged) {
         if (isLogged) {
-          Navigator.of(context).pushReplacementNamed(FriendsPage.tag);
+          Navigator.of(context).pushReplacementNamed(JournalPage.tag);
         }
       });
     }  

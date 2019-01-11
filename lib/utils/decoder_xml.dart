@@ -1,4 +1,5 @@
 import 'package:dreamwithme/models/xml_param.dart';
+import 'package:dreamwithme/models/xml_params/xml_struct.dart';
 import 'package:dreamwithme/models/xml_params/xml_array.dart';
 import 'package:xml/xml.dart';
 
@@ -40,26 +41,45 @@ class DecoderXml {
     // return new Fault(faultCode, faultString);
   }
 
-  XmlElement _getFirstXmlElement(XmlNode node) {
+  XmlElement _getFirstXmlElement(XmlNode node) { 
+    if (node.firstChild == null) {
+      return null;
+    }
+
     XmlNode element = node.firstChild;
     while (element.nodeType != XmlNodeType.ELEMENT) {
       element = element.nextSibling;
+      if (element == null) {
+        return null;
+      }
     }
 
     return element;
   }  
 
-  XmlElement _getLastXmlElement(XmlNode node) {
+  XmlElement _getLastXmlElement(XmlNode node) {    
+    if (node.lastChild == null) {
+      return null;
+    }
+
     XmlNode element = node.lastChild;
     while (element.nodeType != XmlNodeType.ELEMENT) {
       element = element.previousSibling;
+      if (element == null) {
+        return null;
+      }
     }
 
     return element;
   }
 
   String _getMemberType(XmlElement member) {
-    return this._getFirstXmlElement(this._getLastXmlElement(member)).name.local;
+    XmlElement element = this._getLastXmlElement(member);
+    if (element.firstChild == null) {
+      return null;
+    }
+
+    return this._getFirstXmlElement(element).name.local;
   }
 
   String _getMemberName(XmlElement member) {
@@ -83,7 +103,13 @@ class DecoderXml {
     members.forEach((XmlElement member) {
       String type = this._getMemberType(member);
       XmlElement memberValue = this._getFirstXmlElement(this._getLastXmlElement(member));
-      if (type == 'array') {
+      if (type == null) {
+        parameters.addAll({this._getMemberName(member): null});
+      } else if (type == 'struct') {
+        XmlStruct struct = XmlStruct();
+        struct.items.addAll(this._getMembers(memberValue));
+        parameters.addAll({this._getMemberName(member):struct});
+      } else if (type == 'array') {
         XmlArray array = XmlArray();
         array.items.addAll(this._getArrayMembers(memberValue));
         parameters.addAll({this._getMemberName(member):array});

@@ -3,7 +3,7 @@ import 'package:xml/xml.dart';
 
 class XmlString implements XmlParam {
   String value;
-  XmlString(value) {
+  XmlString(String value) {
     this.value = value;
   }
 

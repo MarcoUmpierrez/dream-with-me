@@ -4,7 +4,7 @@ import 'package:xml/xml.dart';
 class XmlInt implements XmlParam {
   String value;
   int _value;
-  XmlInt(value) {
+  XmlInt(String value) {
     this.value = value;
     this._value = int.parse(value);
   }

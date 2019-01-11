@@ -9,6 +9,13 @@ class Entry {
   String subjectRaw;
   String journalType;
 
+  Entry(String journalName, String posterName, String subject, String body) {
+    this.journalName = journalName ?? 'Journal';
+    this.posterName = posterName ?? 'Poster';
+    this.subjectRaw = subject ?? 'No Subject';
+    this.eventRaw = body ?? 'No content';
+  }
+
   String getContent() {
     String content;
     if (this.eventRaw.isNotEmpty) {

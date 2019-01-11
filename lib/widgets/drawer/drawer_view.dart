@@ -1,4 +1,5 @@
 import 'package:dreamwithme/clients/dreamwidth.dart';
+import 'package:dreamwithme/pages/journal.dart';
 import 'package:dreamwithme/pages/login.dart';
 import 'package:dreamwithme/pages/post.dart';
 import 'package:dreamwithme/widgets/drawer/drawer_header_view.dart';
@@ -21,14 +22,25 @@ class DrawerView extends StatelessWidget {
             onTap: () {
               Navigator.pop(context);
               Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => PostPage(client: this.client))
-              );
+                  builder: (context) => PostPage()));
             },
           ),
           Divider(),
           ListTile(title: Text('Profile'), trailing: Icon(Icons.person)),
+          ListTile(
+              title: Text('Journal'),
+              trailing: Icon(Icons.book),
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => JournalPage(
+                        userName: this.client.currentUser.userName)));
+              }),
           ListTile(title: Text('Inbox'), trailing: Icon(Icons.inbox)),
-          ListTile(title: Text('Reading'), trailing: Icon(Icons.people)),
+          ListTile(title: Text('Reading'), trailing: Icon(Icons.people),
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.popUntil(context, ModalRoute.withName(JournalPage.tag));
+          }),
           Divider(),
           // TODO: add list of tags
           ListTile(

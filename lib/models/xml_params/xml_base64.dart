@@ -4,7 +4,7 @@ import 'dart:convert';
 
 class XmlBase64 implements XmlParam {
   String value;
-  XmlBase64(value) {
+  XmlBase64(String value) {
     this.value = value;
   }
 

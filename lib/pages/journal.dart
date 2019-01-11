@@ -1,37 +1,62 @@
 import 'package:dreamwithme/clients/dreamwidth.dart';
+import 'package:dreamwithme/main.dart';
 import 'package:dreamwithme/models/entry.dart';
+import 'package:dreamwithme/models/event.dart';
 import 'package:dreamwithme/widgets/drawer/drawer_view.dart';
 import 'package:dreamwithme/widgets/entry/entry_view.dart';
 import 'package:flutter/material.dart';
 
-class FriendsPage extends StatefulWidget {
-  static String tag = 'friends-page';
-  final DreamWidthClient client;
+class JournalPage extends StatefulWidget {
+  static String tag = 'journal-page';
+  final String userName;
   
-  const FriendsPage({ Key key, this.client}) : super(key: key);
+  const JournalPage({ Key key, this.userName}) : super(key: key);
 
   @override
-  _FriendsPageState createState() => _FriendsPageState();
+  _JournalPageState createState() => _JournalPageState();
 }
 
-class _FriendsPageState extends State<FriendsPage> {
+class _JournalPageState extends State<JournalPage> {
   List<Entry> _entries;
   bool _isLoading;
 
-  _FriendsPageState() {
+  _JournalPageState() {
     this._isLoading = true; 
     this._entries = [];   
   }
 
   void _getEntries() {
-    widget.client.getReadPage().then((list) {
-      assert(list != null, 'Friend Page: list of entries null');
-      setState(() {
-        this._entries.clear();
-        this._entries.addAll(list);
-        this._isLoading = false;
+    if (widget.userName.isEmpty) {
+      DreamWithMe.client.getReadPage().then((list) {
+        assert(list != null, 'Journal Page: list of events null');
+        setState(() {
+          this._entries.clear();
+          this._entries.addAll(list);
+          this._isLoading = false;
+        });
       });
-    });
+    } else {
+      DreamWithMe.client.getEvents(widget.userName).then((list) {
+        assert(list != null, 'Journal Page: list of events null');
+        setState(() {
+          this._entries.clear();
+          list.forEach((Event event) {
+            Entry entry = Entry(null, widget.userName, event.subject, event.event);
+            entry
+            ..itemId = event.itemId
+            ..eventRaw = event.event
+            ..logTime = DateTime.parse(event.logTime).millisecondsSinceEpoch ~/ 1000;
+            this._entries.add(entry);
+            //..journalType = '?'
+            //..posterName = '?'
+            //..posterType = '?'
+            //..security = '?';
+          });
+          
+          this._isLoading = false;
+        });
+      });
+    }
   }
 
   @override
@@ -51,7 +76,7 @@ class _FriendsPageState extends State<FriendsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Reading'),
+        title: Text(widget.userName.isEmpty? 'Reading' : '${widget.userName}\'s Entries'),
         backgroundColor: Theme.of(context).primaryColor,
         actions: <Widget>[
           IconButton(
@@ -62,7 +87,7 @@ class _FriendsPageState extends State<FriendsPage> {
           )
         ],
       ),
-      drawer: DrawerView(widget.client),
+      drawer: DrawerView(DreamWithMe.client),
       body: this._isLoading ? loadBar : Center(
       child: ListView.builder(
           itemCount: this._entries.length,

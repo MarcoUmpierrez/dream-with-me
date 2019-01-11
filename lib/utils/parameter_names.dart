@@ -4,7 +4,6 @@ class ChallengeParams {
   static const String ExpireTime = 'expire_time';
   static const String ServerTime = 'server_time';
 }
-
 class AuthParams {
   static const String AuthChallenge = 'auth_challenge';
   static const String AuthResponse = 'auth_response';
@@ -21,7 +20,6 @@ class LoginParams {
   static const String Ver = 'ver';
   
 }
-
 class UserTagsParams {  
   static const String Tags = 'tags';
   static const String Display = 'display';
@@ -30,7 +28,6 @@ class UserTagsParams {
   static const String Uses = 'uses';
   static const String Ver = 'ver';
 }
-
 class ReadPageParams {
   static const String Entries = 'entries';
   static const String JournalName = 'journalname';
@@ -43,7 +40,6 @@ class ReadPageParams {
   static const String SubjectRaw = 'subject_raw';
   static const String JournalType = 'journaltype';
 }
-
 class PostEventParams {
   static const String Ver = 'ver';
   static const String Subject = 'subject';
@@ -61,4 +57,26 @@ class PostEventParams {
   static const String ItemId = 'itemid';
   static const String Anum = 'anum';
   static const String Url = 'url';
+}
+
+class EventParams {
+  static const String SelectType = 'selecttype';
+  static const String HowMany = 'howmany';
+  static const String NoProps = 'noprops';
+  static const String LineEndings = 'lineendings';
+  static const String Truncate = 'truncate';
+  static const String UseJournal = 'usejournal';
+  static const String Events = 'events';
+  static const String Event = 'event';
+  static const String URL = 'url';
+  static const String EventTime = 'eventtime';
+  static const String Subject = 'subject';
+  static const String LogTime = 'logtime';
+  static const String ItemId = 'itemid';
+  static const String Anum = 'anum';
+  static const String Props = 'props';
+  static const String PictureKeyword = 'picture_keyword';
+  static const String Interface = 'interface';
+  static const String TagList = 'taglist';
+  static const String OptScreening = 'opt_screening';
 }

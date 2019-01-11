@@ -1,5 +1,5 @@
 import 'package:dreamwithme/clients/dreamwidth.dart';
-import 'package:dreamwithme/pages/friends.dart';
+import 'package:dreamwithme/pages/journal.dart';
 import 'package:dreamwithme/pages/login.dart';
 import 'package:flutter/material.dart';
 
@@ -38,10 +38,10 @@ class DreamWithMe extends StatelessWidget {
         //   subhead: TextStyle(fontSize: 14.0, color: Colors.white),
         // )
       ),
-      home: LoginPage(client: client),
+      home: LoginPage(),
       routes: <String, WidgetBuilder> {
-        LoginPage.tag: (context) => LoginPage(client: client),
-        FriendsPage.tag: (context) => FriendsPage(client: client),
+        LoginPage.tag: (context) => LoginPage(),
+        JournalPage.tag: (context) => JournalPage(userName: ''),
       },
     );
   }
