@@ -55,8 +55,13 @@ class DreamWidthClient {
   // Get challenge auth token
   Future<Challenge> getChallenge() async {
     try {
-      Map<String, XmlParam> parameters = await this.xmlRpcRequest(MethodNames.GetChallenge);
-      
+      Map<String, XmlParam> parameters = await this.xmlRpcRequest(MethodNames.GetChallenge);      
+
+      if (parameters.containsKey(FaultParams.FaultCode)) {
+        print('API ERROR:${parameters[FaultParams.FaultString].getValue()}');
+        return null;
+      }
+
       if (parameters.containsKey(ChallengeParams.Challenge)) {
         return Challenge(this._getMapValue(parameters, ChallengeParams.Challenge),
                     authScheme: this._getMapValue(parameters, ChallengeParams.AuthScheme),
@@ -110,7 +115,12 @@ class DreamWidthClient {
         LoginParams.GetPickWS: XmlInt('1'),
         LoginParams.GetPickWURLS: XmlInt('1'),
         LoginParams.Ver: XmlInt('1')
-      });
+      });      
+
+      if (parameters.containsKey(FaultParams.FaultCode)) {
+        print('API ERROR:${parameters[FaultParams.FaultString].getValue()}');
+        return false;
+      }
 
       if (parameters.containsKey(LoginParams.UserId)) {
         this.currentUser
@@ -136,7 +146,12 @@ class DreamWidthClient {
     try {
       Map<String, XmlParam> parameters = await this._methodCall(MethodNames.GetUserTags, params: {        
         UserTagsParams.Ver: XmlInt('1')
-      });
+      });      
+
+      if (parameters.containsKey(FaultParams.FaultCode)) {
+        print('API ERROR:${parameters[FaultParams.FaultString].getValue()}');
+        return [];
+      }
 
       List<Tag> tagList;
       if (parameters.containsKey(UserTagsParams.Tags)) {
@@ -165,7 +180,13 @@ class DreamWidthClient {
 
   Future<bool> getInbox() async {
     try {
-      Map<String, XmlParam> parameters = await this._methodCall(MethodNames.GetInbox);
+      Map<String, XmlParam> parameters = await this._methodCall(MethodNames.GetInbox);      
+
+      if (parameters.containsKey(FaultParams.FaultCode)) {
+        print('API ERROR:${parameters[FaultParams.FaultString].getValue()}');
+        return false;
+      }
+
       print(parameters);
     } catch (e) {
       print('Get Inbox request failed');
@@ -180,9 +201,15 @@ class DreamWidthClient {
         EventParams.HowMany: XmlInt('20'),
         EventParams.NoProps:XmlInt('0'),
         EventParams.LineEndings:XmlString('unix'),
-        EventParams.UseJournal:XmlString(useJournal)
+        EventParams.UseJournal:XmlString(useJournal),
+        EventParams.Ver: XmlInt('1')
         // EventParams.Truncate:XmlInt('20')
       });
+
+      if (parameters.containsKey(FaultParams.FaultCode)) {
+        print('API ERROR:${parameters[FaultParams.FaultString].getValue()}');
+        return [];
+      }
 
       if (parameters.containsKey(EventParams.Events)) {
         List<Event> list = [];
@@ -191,6 +218,7 @@ class DreamWidthClient {
           mapList.forEach((Map<String, XmlParam> map) {
             Event event = Event();
             event
+            ..poster = this._getMapValue(map, EventParams.Poster)
             ..url = this._getMapValue(map, EventParams.URL)
             ..event = this._getMapValue(map, EventParams.Event)
             ..eventTime = this._getMapValue(map, EventParams.EventTime)
@@ -204,7 +232,7 @@ class DreamWidthClient {
               event
               ..pictureKeyword = this._getMapValue(props, EventParams.PictureKeyword)
               ..interface = this._getMapValue(props, EventParams.Interface)
-              ..tagList = this._getMapValue(props, EventParams.TagList)
+              ..tagList = this._getMapValue(props, EventParams.TagList).toString()
               ..optScreening = this._getMapValue(props, EventParams.OptScreening);
             }
 
@@ -224,7 +252,12 @@ class DreamWidthClient {
 
   Future<List<Entry>> getReadPage() async {
     try {      
-      Map<String, XmlParam> parameters = await this._methodCall(MethodNames.GetReadPage);
+      Map<String, XmlParam> parameters = await this._methodCall(MethodNames.GetReadPage);     
+
+      if (parameters.containsKey(FaultParams.FaultCode)) {
+        print('API ERROR:${parameters[FaultParams.FaultString].getValue()}');
+        return [];
+      }
 
       List<Entry> list = [];
       if (parameters.containsKey(ReadPageParams.Entries)) {
@@ -293,11 +326,15 @@ class DreamWidthClient {
         PostEventParams.Hour: XmlString(date.hour.toString()),
         PostEventParams.Min: XmlString(date.minute.toString()),
         PostEventParams.Props: props
-      });
+      });      
 
-      if (parameters.containsKey(PostEventParams.ItemId)) {
-        return true;
+      if (parameters.containsKey(FaultParams.FaultCode)) {
+        print('API ERROR:${parameters[FaultParams.FaultString].getValue()}');
+        return false;
       }
+
+      return true;
+
     } catch (e) {
       print('Post request failed');
     }

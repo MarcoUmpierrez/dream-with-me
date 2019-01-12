@@ -10,4 +10,5 @@ class Event {
   String interface;
   String tagList;
   String optScreening;
+  String poster;
 }

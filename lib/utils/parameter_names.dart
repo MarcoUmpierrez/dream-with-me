@@ -60,6 +60,7 @@ class PostEventParams {
 }
 
 class EventParams {
+  static const String Ver = 'ver';
   static const String SelectType = 'selecttype';
   static const String HowMany = 'howmany';
   static const String NoProps = 'noprops';
@@ -79,4 +80,10 @@ class EventParams {
   static const String Interface = 'interface';
   static const String TagList = 'taglist';
   static const String OptScreening = 'opt_screening';
+  static const String Poster = 'poster';
+}
+
+class FaultParams {
+  static const String FaultString = 'faultString';
+  static const String FaultCode = 'faultCode';  
 }

@@ -41,7 +41,7 @@ class _JournalPageState extends State<JournalPage> {
         setState(() {
           this._entries.clear();
           list.forEach((Event event) {
-            Entry entry = Entry(null, widget.userName, event.subject, event.event);
+            Entry entry = Entry(event.poster, widget.userName, event.subject, event.event);
             entry
             ..itemId = event.itemId
             ..eventRaw = event.event

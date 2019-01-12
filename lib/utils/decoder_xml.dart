@@ -15,30 +15,6 @@ class DecoderXml {
     }
 
     return null;
-
-    // TODO: handle fault responses
-    // int faultCode;
-    // String faultString;
-    // final members = response
-    //     .findElements('fault')
-    //     .first
-    //     .findElements('value')
-    //     .first
-    //     .findElements('struct')
-    //     .first
-    //     .findElements('member');
-    // for (final member in members) {
-    //   final name = member.findElements('name').first.text;
-    //   final valueElt = member.findElements('value').first;
-    //   final elt = getValueContent(valueElt);
-    //   final value = decode(elt, decodeCodecs);
-    //   if (name == 'faultCode') {
-    //     faultCode = value as int;
-    //   } else if (name == 'faultString') {
-    //     faultString = value as String;
-    //   }
-    // }
-    // return new Fault(faultCode, faultString);
   }
 
   XmlElement _getFirstXmlElement(XmlNode node) { 
