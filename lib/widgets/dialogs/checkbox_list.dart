@@ -30,9 +30,20 @@ class _CheckboxListView extends StatefulWidget {
 }
 
 class _CheckboxListState extends State<_CheckboxListView> {
+  final List<Tuple<String, bool>> _defaultTagList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    widget.options.forEach((item) {
+      _defaultTagList.add(item);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     int itemCount = widget.options != null ? widget.options.length : 0;
+    TextEditingController controller = TextEditingController();
     return Container(
         padding: EdgeInsets.all(20.0),
         child: Scaffold(
@@ -40,16 +51,65 @@ class _CheckboxListState extends State<_CheckboxListView> {
             title: Text(widget.title),
             automaticallyImplyLeading: false,
             backgroundColor: Theme.of(context).primaryColor,
-            actions: <Widget>[
-              IconButton(
-                icon: Icon(Icons.add),
-                onPressed: () {
-                  // TODO: implement dialog for adding tags
-                },
-              )
-            ],
           ),
-          body: ListView.builder(
+          body: buildBody(itemCount, controller),
+          persistentFooterButtons: <Widget>[
+            FlatButton(
+                child: Row(
+                  children: <Widget>[Icon(Icons.cancel), Text('Cancel')],
+                ),
+                onPressed: () {
+                  widget.options.clear();
+                  _defaultTagList.forEach((item) {
+                    widget.options.add(item);
+                  });
+                  Navigator.pop(context);
+                }),
+            FlatButton(
+                child: Row(
+                  children: <Widget>[Icon(Icons.save), Text('Save')],
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                })
+          ],
+        ));
+  }
+
+  Column buildBody(int itemCount, TextEditingController controller) {
+    return Column(children: <Widget>[
+      Row(children: <Widget>[
+        Expanded(child: 
+        Container(
+          child: 
+            TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                  hintText: "New Tag",
+                  contentPadding: EdgeInsets.all(5.0)
+              )
+            ),
+          width: MediaQuery.of(context).size.width,
+          padding: EdgeInsets.all(5.0),
+        )),
+        FlatButton(
+          child: Container(
+            child: Row(children: <Widget>[Icon(Icons.add), Text("Add")]),
+          ),
+          onPressed: () {
+            setState(() {
+              widget
+                .options
+                .add(Tuple<String, bool>(controller.text, true));
+              controller.clear();
+            });
+          },
+        )
+      ]),      
+      Expanded(
+        child: Container(
+          child: Scrollbar(
+            child: ListView.builder(
               itemCount: itemCount,
               itemBuilder: (context, i) {
                 return CheckboxListTile(
@@ -61,25 +121,11 @@ class _CheckboxListState extends State<_CheckboxListView> {
                         widget.options[i].value = value;
                       });
                     });
-              }),
-          persistentFooterButtons: <Widget>[
-            FlatButton(
-              child: Row(
-                children: <Widget>[Icon(Icons.cancel), Text('Cancel')],
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-              }
+              })
             ),
-            FlatButton(
-              child: Row(
-                children: <Widget>[Icon(Icons.save), Text('Save')],
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-              }
-            )
-          ],
-        ));
+          height: MediaQuery.of(context).size.height,
+        ),
+      )
+    ]);
   }
 }
