@@ -86,25 +86,21 @@ class _CheckboxListState extends State<_CheckboxListView> {
               controller: controller,
               decoration: InputDecoration(
                   hintText: "New Tag",
-                  contentPadding: EdgeInsets.all(5.0)
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.add),
+                    onPressed: () {
+                      setState(() {
+                           widget
+                            .options
+                            .add(Tuple<String, bool>(controller.text, true));
+                          controller.clear();
+                      });
+                    })
               )
             ),
           width: MediaQuery.of(context).size.width,
           padding: EdgeInsets.all(5.0),
-        )),
-        FlatButton(
-          child: Container(
-            child: Row(children: <Widget>[Icon(Icons.add), Text("Add")]),
-          ),
-          onPressed: () {
-            setState(() {
-              widget
-                .options
-                .add(Tuple<String, bool>(controller.text, true));
-              controller.clear();
-            });
-          },
-        )
+        ))
       ]),      
       Expanded(
         child: Container(
