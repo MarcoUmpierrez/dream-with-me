@@ -1,4 +1,3 @@
-import 'package:dreamwithme/clients/dreamwidth.dart';
 import 'package:dreamwithme/main.dart';
 import 'package:dreamwithme/models/entry.dart';
 import 'package:dreamwithme/models/event.dart';
@@ -87,26 +86,17 @@ class _JournalPageState extends State<JournalPage> {
           )
         ],
       ),
-      drawer: DrawerView(DreamWithMe.client),
+      drawer: DrawerView(),
       body: this._isLoading ? loadBar : Center(
       child: ListView.builder(
           itemCount: this._entries.length,
           itemBuilder: (context, i) {
             final Entry entry = this._entries.length > 0 ? this._entries[i] : null;
             return EntryView(entry);
-            // return FlatButton(
-            //   padding: EdgeInsets.all(0.2),
-            //   child: EntryView(entry),
-            //   onPressed: () {
-            //     print('pressed $i entry');
-            //   },
-            // );
           },
         ),
       ),
     );
-      
-      //Container(color: const Color(0xFFFFE306));
   }
 }
 

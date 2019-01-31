@@ -38,6 +38,33 @@ class _CheckboxListState extends State<_CheckboxListView> {
     widget.options.forEach((item) {
       _defaultTagList.add(item);
     });
+  }  
+
+  void save(BuildContext context) {
+    Navigator.pop(context);
+  }
+
+  void cancel(BuildContext context) {
+    widget.options.clear();
+    _defaultTagList.forEach((item) {
+      widget.options.add(item);
+    });
+    Navigator.pop(context);
+  } 
+
+  void switchTagCheckedValue(int i, bool value) {
+     setState(() {
+      widget.options[i].value = value;
+    });
+  }
+
+  void addNewTag(TextEditingController controller) {
+    setState(() {
+         widget
+          .options
+          .add(Tuple<String, bool>(controller.text, true));
+        controller.clear();
+    });
   }
 
   @override
@@ -55,23 +82,11 @@ class _CheckboxListState extends State<_CheckboxListView> {
           body: buildBody(itemCount, controller),
           persistentFooterButtons: <Widget>[
             FlatButton(
-                child: Row(
-                  children: <Widget>[Icon(Icons.cancel), Text('Cancel')],
-                ),
-                onPressed: () {
-                  widget.options.clear();
-                  _defaultTagList.forEach((item) {
-                    widget.options.add(item);
-                  });
-                  Navigator.pop(context);
-                }),
+                child: Row(children: <Widget>[Icon(Icons.cancel), Text('Cancel')]),
+                onPressed: () { cancel(context); }),
             FlatButton(
-                child: Row(
-                  children: <Widget>[Icon(Icons.save), Text('Save')],
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                })
+                child: Row(children: <Widget>[Icon(Icons.save), Text('Save')]),
+                onPressed: () { save(context); })
           ],
         ));
   }
@@ -88,14 +103,7 @@ class _CheckboxListState extends State<_CheckboxListView> {
                   hintText: "New Tag",
                   suffixIcon: IconButton(
                     icon: Icon(Icons.add),
-                    onPressed: () {
-                      setState(() {
-                           widget
-                            .options
-                            .add(Tuple<String, bool>(controller.text, true));
-                          controller.clear();
-                      });
-                    })
+                    onPressed: () { addNewTag(controller); })
               )
             ),
           width: MediaQuery.of(context).size.width,
@@ -112,11 +120,7 @@ class _CheckboxListState extends State<_CheckboxListView> {
                     title: Text(widget.options[i].key),
                     value: widget.options[i].value,
                     controlAffinity: ListTileControlAffinity.leading,
-                    onChanged: (bool value) {
-                      setState(() {
-                        widget.options[i].value = value;
-                      });
-                    });
+                    onChanged: (bool value) { switchTagCheckedValue(i, value); });
               })
             ),
           height: MediaQuery.of(context).size.height,
