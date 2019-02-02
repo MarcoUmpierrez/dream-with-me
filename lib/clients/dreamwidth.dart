@@ -36,14 +36,15 @@ class DreamWidthClient {
 
   Future<Map<String, XmlParam>> xmlRpcRequest(String methodName, [Map<String, XmlParam> params]) async {
     final String body = this.encoder.generateXML('$methodUrl.$methodName', params).toXmlString();
-    final Map<String, String> headers = <String, String>{'Content-Type': 'text/xml'};
+    final Map<String, String> headers = <String, String> {
+      'Content-Type': 'text/xml'
+    };
 
     Response response = await client.post(
-      'https://$host$path',
-      headers: headers, 
-      body: body, 
-      encoding: utf8
-    );
+                                'https://$host$path',
+                                headers: headers, 
+                                body: body, 
+                                encoding: utf8);
 
     if (response.statusCode == 200) {
       return this.decoder.decoderXml(parse(response.body));
@@ -51,11 +52,10 @@ class DreamWidthClient {
       return new Future.error(response);
     }
   }
-
-  // Get challenge auth token
+  
   Future<Challenge> getChallenge() async {
     try {
-      Map<String, XmlParam> parameters = await this.xmlRpcRequest(MethodNames.GetChallenge);      
+      Map<String, XmlParam> parameters = await this.xmlRpcRequest(MethodNames.GetChallenge);
 
       if (parameters.containsKey(FaultParams.FaultCode)) {
         print('API ERROR:${parameters[FaultParams.FaultString].getValue()}');
@@ -64,9 +64,9 @@ class DreamWidthClient {
 
       if (parameters.containsKey(ChallengeParams.Challenge)) {
         return Challenge(this._getMapValue(parameters, ChallengeParams.Challenge),
-                    authScheme: this._getMapValue(parameters, ChallengeParams.AuthScheme),
-                    expireTime: this._getMapValue(parameters, ChallengeParams.ExpireTime),
-                    serverTime: this._getMapValue(parameters, ChallengeParams.ServerTime));    
+            authScheme: this._getMapValue(parameters, ChallengeParams.AuthScheme),
+            expireTime: this._getMapValue(parameters, ChallengeParams.ExpireTime),
+            serverTime: this._getMapValue(parameters, ChallengeParams.ServerTime));
       } else {
         return null;
       }
@@ -74,18 +74,16 @@ class DreamWidthClient {
       print('Challenge request failed');
     }
 
-    return null;    
+    return null;
   }
-
-  // Generic method
+  
   Future<Map<String, XmlParam>> _methodCall(String methodName, {Map<String, XmlParam> params}) async {
-    
     this.challenge = await this.getChallenge();
 
     // // reuse challenge if it's not expired
     // if (this.challenge == null || this.challenge.isExpired()) {
     //   this.challenge = await this.getChallenge();
-    // }     
+    // }
 
     if (this.challenge != null) {
       if (params == null) {
@@ -115,7 +113,7 @@ class DreamWidthClient {
         LoginParams.GetPickWS: XmlInt('1'),
         LoginParams.GetPickWURLS: XmlInt('1'),
         LoginParams.Ver: XmlInt('1')
-      });      
+      });
 
       if (parameters.containsKey(FaultParams.FaultCode)) {
         print('API ERROR:${parameters[FaultParams.FaultString].getValue()}');
@@ -133,20 +131,20 @@ class DreamWidthClient {
         return true;
       } else {
         return false;
-      }  
+      }
     } catch (e) {
       print('Login request failed');
     }
-    
+
     this.currentUser = oldUser;
     return false;
   }
 
   Future<List<Tag>> getUserTags() async {
     try {
-      Map<String, XmlParam> parameters = await this._methodCall(MethodNames.GetUserTags, params: {        
+      Map<String, XmlParam> parameters = await this._methodCall(MethodNames.GetUserTags, params: {
         UserTagsParams.Ver: XmlInt('1')
-      });      
+      });
 
       if (parameters.containsKey(FaultParams.FaultCode)) {
         print('API ERROR:${parameters[FaultParams.FaultString].getValue()}');
@@ -155,20 +153,21 @@ class DreamWidthClient {
 
       List<Tag> tagList;
       if (parameters.containsKey(UserTagsParams.Tags)) {
-          List<Map<String, XmlParam>> mapList = this._getMapValue(parameters, UserTagsParams.Tags);
-          mapList.forEach((Map<String, XmlParam> tag) {
-            if (tagList == null) {
-              tagList = [];
-            }
+        List<Map<String, XmlParam>> mapList = this._getMapValue(parameters, UserTagsParams.Tags);
+        mapList.forEach((Map<String, XmlParam> tag) {
+          if (tagList == null) {
+            tagList = [];
+          }
 
-            // for now I don't worry about the number of times a tag has been used in
-            // the different security modes (property: security)
-            tagList.add(Tag(this._getMapValue(tag, UserTagsParams.Display),
-                            this._getMapValue(tag, UserTagsParams.SecurityLevel),
-                            this._getMapValue(tag, UserTagsParams.Name),
-                            this._getMapValue(tag, UserTagsParams.Uses)));
-          });
-      }      
+          // for now I don't worry about the number of times a tag has been used in
+          // the different security modes (property: security)
+          tagList.add(Tag(
+              this._getMapValue(tag, UserTagsParams.Display),
+              this._getMapValue(tag, UserTagsParams.SecurityLevel),
+              this._getMapValue(tag, UserTagsParams.Name),
+              this._getMapValue(tag, UserTagsParams.Uses)));
+        });
+      }
 
       return tagList;
     } catch (e) {
@@ -178,33 +177,32 @@ class DreamWidthClient {
     return null;
   }
 
-  Future<bool> getInbox() async {
+  Future<List<Event>> getEvents(String useJournal, {int year, int month, int day}) async {
     try {
-      Map<String, XmlParam> parameters = await this._methodCall(MethodNames.GetInbox);      
-
-      if (parameters.containsKey(FaultParams.FaultCode)) {
-        print('API ERROR:${parameters[FaultParams.FaultString].getValue()}');
-        return false;
-      }
-
-      print(parameters);
-    } catch (e) {
-      print('Get Inbox request failed');
-    }
-  } 
-
-  Future<List<Event>> getEvents(String useJournal) async {
-    try {
-      Map<String, XmlParam> parameters = await this._methodCall(MethodNames.GetEvents, params: {
-        'auth_method':XmlString('cookie'),
-        EventParams.SelectType:XmlString('lastn'),
+      Map<String, XmlParam> params = {
+        'auth_method': XmlString('cookie'),
         EventParams.HowMany: XmlInt('20'),
-        EventParams.NoProps:XmlInt('0'),
-        EventParams.LineEndings:XmlString('unix'),
-        EventParams.UseJournal:XmlString(useJournal),
+        EventParams.NoProps: XmlInt('0'),
+        EventParams.LineEndings: XmlString('unix'),
+        EventParams.UseJournal: XmlString(useJournal),
         EventParams.Ver: XmlInt('1')
         // EventParams.Truncate:XmlInt('20')
-      });
+      };
+
+      if (year != null) {
+        params.addAll({          
+          EventParams.Year: XmlInt(year.toString()),
+          EventParams.Month: XmlInt(month.toString()),
+          EventParams.Day: XmlInt(day.toString()),
+          EventParams.SelectType: XmlString('day'),
+        });
+      } else {
+        params.addAll({          
+          EventParams.SelectType: XmlString('lastn'),
+        });
+      }
+
+      Map<String, XmlParam> parameters = await this._methodCall(MethodNames.GetEvents, params: params);
 
       if (parameters.containsKey(FaultParams.FaultCode)) {
         print('API ERROR:${parameters[FaultParams.FaultString].getValue()}');
@@ -214,26 +212,28 @@ class DreamWidthClient {
       if (parameters.containsKey(EventParams.Events)) {
         List<Event> list = [];
         if (parameters.containsKey(EventParams.Events)) {
-          List<Map<String, XmlParam>> mapList = this._getMapValue(parameters, EventParams.Events);
+          List<Map<String, XmlParam>> mapList =
+              this._getMapValue(parameters, EventParams.Events);
           mapList.forEach((Map<String, XmlParam> map) {
             Event event = Event();
             event
-            ..poster = this._getMapValue(map, EventParams.Poster)
-            ..url = this._getMapValue(map, EventParams.URL)
-            ..event = this._getMapValue(map, EventParams.Event)
-            ..eventTime = this._getMapValue(map, EventParams.EventTime)
-            ..subject = this._getMapValue(map, EventParams.Subject)
-            ..logTime = this._getMapValue(map, EventParams.LogTime)
-            ..itemId = this._getMapValue(map, EventParams.ItemId)
-            ..anum = this._getMapValue(map, EventParams.Anum);
+              ..poster = this._getMapValue(map, EventParams.Poster)
+              ..url = this._getMapValue(map, EventParams.URL)
+              ..event = this._getMapValue(map, EventParams.Event)
+              ..eventTime = this._getMapValue(map, EventParams.EventTime)
+              ..subject = this._getMapValue(map, EventParams.Subject)
+              ..logTime = this._getMapValue(map, EventParams.LogTime)
+              ..itemId = this._getMapValue(map, EventParams.ItemId)
+              ..anum = this._getMapValue(map, EventParams.Anum);
 
             if (map.containsKey(EventParams.Props)) {
-              Map<String, XmlParam> props = this._getMapValue(map, EventParams.Props);
+              Map<String, XmlParam> props =
+                  this._getMapValue(map, EventParams.Props);
               event
-              ..pictureKeyword = this._getMapValue(props, EventParams.PictureKeyword)
-              ..interface = this._getMapValue(props, EventParams.Interface)
-              ..tagList = this._getMapValue(props, EventParams.TagList).toString()
-              ..optScreening = this._getMapValue(props, EventParams.OptScreening);
+                ..pictureKeyword = this._getMapValue(props, EventParams.PictureKeyword)
+                ..interface = this._getMapValue(props, EventParams.Interface)
+                ..tagList = this._getMapValue(props, EventParams.TagList).toString()
+                ..optScreening = this._getMapValue(props, EventParams.OptScreening);
             }
 
             list.add(event);
@@ -246,13 +246,14 @@ class DreamWidthClient {
     } catch (e) {
       print('Get Events request failed');
     }
-    
-      return null;
+
+    return null;
   }
 
   Future<List<Entry>> getReadPage() async {
-    try {      
-      Map<String, XmlParam> parameters = await this._methodCall(MethodNames.GetReadPage);     
+    try {
+      Map<String, XmlParam> parameters =
+          await this._methodCall(MethodNames.GetReadPage);
 
       if (parameters.containsKey(FaultParams.FaultCode)) {
         print('API ERROR:${parameters[FaultParams.FaultString].getValue()}');
@@ -261,24 +262,24 @@ class DreamWidthClient {
 
       List<Entry> list = [];
       if (parameters.containsKey(ReadPageParams.Entries)) {
-        List<Map<String, XmlParam>> mapList = this._getMapValue(parameters, ReadPageParams.Entries);
+        List<Map<String, XmlParam>> mapList =
+            this._getMapValue(parameters, ReadPageParams.Entries);
         mapList.forEach((Map<String, XmlParam> map) {
           Entry entry = Entry(
-            this._getMapValue(map, ReadPageParams.JournalName),
-            this._getMapValue(map, ReadPageParams.PosterName),
-            this._getMapValue(map, ReadPageParams.SubjectRaw),
-            this._getMapValue(map, ReadPageParams.EventRaw)
-          );
+              this._getMapValue(map, ReadPageParams.JournalName),
+              this._getMapValue(map, ReadPageParams.PosterName),
+              this._getMapValue(map, ReadPageParams.SubjectRaw),
+              this._getMapValue(map, ReadPageParams.EventRaw));
           entry
-          ..logTime = this._getMapValue(map, ReadPageParams.LogTime)
-          ..itemId = this._getMapValue(map, ReadPageParams.DItemId)
-          ..security = this._getMapValue(map, ReadPageParams.Security)
-          ..posterType = this._getMapValue(map, ReadPageParams.PosterType)
-          ..journalType = this._getMapValue(map, ReadPageParams.JournalType);
+            ..logTime = this._getMapValue(map, ReadPageParams.LogTime)
+            ..itemId = this._getMapValue(map, ReadPageParams.DItemId)
+            ..security = this._getMapValue(map, ReadPageParams.Security)
+            ..posterType = this._getMapValue(map, ReadPageParams.PosterType)
+            ..journalType = this._getMapValue(map, ReadPageParams.JournalType);
 
           list.add(entry);
         });
-      }      
+      }
 
       return list;
     } catch (e) {
@@ -288,15 +289,43 @@ class DreamWidthClient {
     return null;
   }
 
-  Future<bool> post(String title, String body, String tags, String access, DateTime date) async {
-    try {      
-      XmlStruct props = XmlStruct();
-      props.items.addAll({
-        PostEventParams.TagList: XmlString(tags ?? '')
+  Future<Map<String,int>> getDayCount(String journal) async {
+    try {
+      Map<String, XmlParam> parameters =
+          await this._methodCall(MethodNames.GetDayCounts, params: {
+            GetDayCountsParams.Usejournal: XmlString(journal),
+            GetDayCountsParams.Ver: XmlInt('1'),
+          });
+
+      if (parameters.containsKey(FaultParams.FaultCode)) {
+        print('API ERROR:${parameters[FaultParams.FaultString].getValue()}');
+        return {};
+      }
+      
+      Map<String,int> list = {};
+      List<Map<String, XmlParam>> days =this._getMapValue(parameters, GetDayCountsParams.DayCounts);
+      days.forEach((Map<String, XmlParam> day) {
+        list.addAll({
+          this._getMapValue(day, GetDayCountsParams.Date) :
+          this._getMapValue(day, GetDayCountsParams.Count)
+        });
       });
 
+      return list;
+    } catch (e) {
+      print('Get Inbox request failed');
+    }
+
+    return null;
+  }
+
+  Future<bool> post(String title, String body, String tags, String access, DateTime date) async {
+    try {
+      XmlStruct props = XmlStruct();
+      props.items.addAll({PostEventParams.TagList: XmlString(tags ?? '')});
+
       XmlString allowMask, security;
-      switch (access){
+      switch (access) {
         case 'Private':
           security = XmlString('private');
           allowMask = XmlString('');
@@ -310,10 +339,10 @@ class DreamWidthClient {
           security = XmlString('public');
           allowMask = XmlString('');
           break;
-        };
-      
+      }
 
-      Map<String, XmlParam> parameters = await this._methodCall(MethodNames.PostEvent, params: {
+      Map<String, XmlParam> parameters =
+          await this._methodCall(MethodNames.PostEvent, params: {
         PostEventParams.Ver: XmlInt('1'),
         PostEventParams.Subject: XmlString(title),
         PostEventParams.Event: XmlString(body),
@@ -326,7 +355,7 @@ class DreamWidthClient {
         PostEventParams.Hour: XmlString(date.hour.toString()),
         PostEventParams.Min: XmlString(date.minute.toString()),
         PostEventParams.Props: props
-      });      
+      });
 
       if (parameters.containsKey(FaultParams.FaultCode)) {
         print('API ERROR:${parameters[FaultParams.FaultString].getValue()}');
@@ -334,7 +363,6 @@ class DreamWidthClient {
       }
 
       return true;
-
     } catch (e) {
       print('Post request failed');
     }
@@ -347,13 +375,13 @@ class DreamWidthClient {
     if (this.users.length > 0) {
       this.currentUser = this.users.first;
     }
-  } 
+  }
 
   dynamic _getMapValue(Map<String, XmlParam> parameters, String key) {
     if (parameters.containsKey(key) && parameters[key] != null) {
       return parameters[key].getValue();
-    } 
-    
+    }
+
     return null;
   }
 }

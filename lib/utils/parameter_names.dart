@@ -81,9 +81,35 @@ class EventParams {
   static const String TagList = 'taglist';
   static const String OptScreening = 'opt_screening';
   static const String Poster = 'poster';
+  static const String CommentAlter = 'commentalter';
+  static const String Year = 'year';
+  static const String Month = 'month';
+  static const String Day = 'day';
 }
 
 class FaultParams {
   static const String FaultString = 'faultString';
   static const String FaultCode = 'faultCode';  
+}
+
+class GetDayCountsParams {
+  static const String Ver = 'ver';
+  static const String Usejournal = 'usejournal';
+  static const String DayCounts = 'daycounts';
+  static const String Date = 'date';
+  static const String Count = 'count';
+}
+
+class CommentParams {
+  static const String Journal = 'journal';
+  static const String DItemId = 'ditemid';
+  static const String ItemId = 'itemid';
+  static const String Extra = 'extra';
+}
+
+class SessionGenerateParams {
+  static const String Ver = 'ver';
+  static const String Expiration = 'expiration';
+  static const String IPFixed = 'ipfixed';
+  static const String LJSession = 'ljsession';
 }
