@@ -7,6 +7,8 @@ import 'package:dreamwithme/models/xml_params/xml_struct.dart';
 
 class XmlParam {
   factory XmlParam(String type, [String value]) {
+    assert(type != null && type.isNotEmpty);
+    
     switch (type) {
       case 'string':
         return XmlString(value);

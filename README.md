@@ -1,20 +1,33 @@
 # Dream With Me
 
-Flutter client for [Dreamwidth.org](https://dreamwidth.org)
+Flutter client for [Dreamwidth.org](https://dreamwidth.org).
+
+This is a hobby project with two main purposes:
+- first one, provide a decent mobile client for Dreamwidth
+- second one, learn more about Flutter and Dart
+
+## Features
+### Implemented
+- Display user picture, name and journal name
+- Display Read Page (page with recent friends' and communities' entries)
+- Display own entries
+  - Through Journal access in the Drawer
+  - Through Calendar in the Drawer by selecting a specific day
+- Public entries
+  - Select day
+  - Select time
+  - Add title and content
+  - Select privacy (Public, Access list (friends) or Private)
+  - Select / Add tags
+
+### In Progress
+- Multiple accounts
+
+### Desired
+- Public / Read comments
+- Display Inbox messages
+- Display friends' journals entries
 
 ## Screenshots
 
 ![Preview](screenshot/preview.png)
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
-
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.

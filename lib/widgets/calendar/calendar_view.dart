@@ -115,8 +115,7 @@ class _CalendarView extends State<CalendarView> {
           margin: EdgeInsets.fromLTRB(10.0, 0, 0, 0),
           padding: EdgeInsets.all(5.0),
           child: GridView.count(
-            // columns
-            crossAxisCount: 7,
+            crossAxisCount: 7, // number of column
             children: list,
           ))
     ]);

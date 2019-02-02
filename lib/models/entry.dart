@@ -17,6 +17,8 @@ class Entry {
   }
 
   String getContent() {
+    assert(this.eventRaw != null);
+    
     String content;
     if (this.eventRaw.isNotEmpty) {
       content = '<p>${this.eventRaw.replaceAll("<br />", "</p><p>")}';
