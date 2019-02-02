@@ -36,24 +36,34 @@ class Calendar {
   }
 
   String getMonthString() {
+    assert(this.month >= 1 && this.month <= 12);
+
     return months[this.month];
   }
 
   String getDayLetter() {
+    assert(this.weekday >= 1 && this.weekday <= 7);
+
     return days[this.weekday];
   }
 
-  void increaseYear() {
+  void increaseYear() {    
+    assert(this.year >= 1);
+
     this.year++;
     this._updateDateInfo();
   }
 
   void decreaseYear() {
+    assert(this.year >= 1);
+
     this.year--;
     this._updateDateInfo();
   }
 
   void increaseMonth() {
+    assert(this.month >= 1 && this.month <= 12);
+
     this.month++;
     if (this.month == 13) {
       this.month = 1;
@@ -63,6 +73,7 @@ class Calendar {
   }
 
   void decreaseMonth() {
+    assert(this.month >= 1 && this.month <= 12);
     this.month--;
     if (this.month == 0) {
       this.month = 12;
@@ -76,7 +87,10 @@ class Calendar {
     this.weekday = this._firstDayOfTheMonth();
   }
 
-  int _daysOfTheMonth() {
+  int _daysOfTheMonth() {  
+    assert(this.year >= 1);  
+    assert(this.month >= 1 && this.month <= 12);
+
     int year = this.year;
     int month = this.month + 1;
     if (month == 13) {
@@ -90,12 +104,19 @@ class Calendar {
   }
 
   int _firstDayOfTheMonth() {
+    assert(this.year >= 1);  
+    assert(this.month >= 1 && this.month <= 12);
+
     return DateTime.parse(formatDate(this.year, this.month, 1, '')).weekday;
   }
 }
   
 
 String formatDate(int year, int month, int day, String separator) {
+    assert(year >= 1);
+    assert(month >= 1 && month <= 12);
+    assert(day >= 1 && day <= 31);
+
   String formattedDate = year.toString();
   
   formattedDate += separator;

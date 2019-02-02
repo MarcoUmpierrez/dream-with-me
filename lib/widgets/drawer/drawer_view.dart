@@ -25,8 +25,15 @@ class DrawerView extends StatelessWidget {
   void openJournal(BuildContext context) {
     Navigator.popUntil(context, ModalRoute.withName(JournalPage.tag));
     Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => JournalPage(
-            userName: DreamWithMe.client.currentUser.userName)));
+        builder: (context) {
+          String userName = DreamWithMe.client.currentUser.userName;
+          return JournalPage(
+            getEntries: () => DreamWithMe.client.getEvents(userName),
+            title: '$userName\'s Entries',
+            reloadDisabled: true);
+          } 
+        )
+      );
   }
 
   void openReadPage(BuildContext context) {
@@ -72,7 +79,7 @@ class DrawerView extends StatelessWidget {
           ),
           Divider(),
           sectionTitle('Entries'),
-          CalendarView(days: {}),
+          CalendarView(),
           Divider(),
           sectionTitle('Account options'),
           ListTile(

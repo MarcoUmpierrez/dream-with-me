@@ -7,9 +7,11 @@ import 'package:flutter/material.dart';
 
 class JournalPage extends StatefulWidget {
   static String tag = 'journal-page';
-  final String userName;
+  final String title;
+  final Function getEntries;
+  final bool reloadDisabled;
   
-  const JournalPage({ Key key, this.userName}) : super(key: key);
+  const JournalPage({ Key key, this.title, this.getEntries, this.reloadDisabled}) : super(key: key);
 
   @override
   _JournalPageState createState() => _JournalPageState();
@@ -21,41 +23,38 @@ class _JournalPageState extends State<JournalPage> {
 
   _JournalPageState() {
     this._isLoading = true; 
-    this._entries = [];   
+    this._loadEntriesFromClient(); 
   }
 
-  void _getEntries() {
-    if (widget.userName.isEmpty) {
-      DreamWithMe.client.getReadPage().then((list) {
-        assert(list != null, 'Journal Page: list of events null');
-        setState(() {
-          this._entries.clear();
+  void _loadEntriesFromClient() {
+    if (widget != null) {
+      widget.getEntries().then((List<dynamic> list) {
+        this._entries = [];
+        if (list is List<Entry>) {
           this._entries.addAll(list);
-          this._isLoading = false;
-        });
-      });
-    } else {
-      DreamWithMe.client.getEvents(widget.userName).then((list) {
-        assert(list != null, 'Journal Page: list of events null');
+        } else if (list is List<Event>) {
+          this._entries.addAll(this._convertEventToEntries(list, DreamWithMe.client.currentUser.userName));
+        }
+      
         setState(() {
-          this._entries.clear();
-          list.forEach((Event event) {
-            Entry entry = Entry(event.poster, widget.userName, event.subject, event.event);
-            entry
-            ..itemId = event.itemId
-            ..eventRaw = event.event
-            ..logTime = DateTime.parse(event.logTime).millisecondsSinceEpoch ~/ 1000;
-            this._entries.add(entry);
-            //..journalType = '?'
-            //..posterName = '?'
-            //..posterType = '?'
-            //..security = '?';
-          });
-          
           this._isLoading = false;
         });
       });
-    }
+    }    
+  }
+
+  List<Entry> _convertEventToEntries(List<Event> list, userName) {
+    List<Entry> entries = [];
+    list.forEach((Event event) {
+      Entry entry = Entry(event.poster, userName, event.subject, event.event);
+      entry
+      ..itemId = event.itemId
+      ..eventRaw = event.event
+      ..logTime = DateTime.parse(event.logTime).millisecondsSinceEpoch ~/ 1000;
+      entries.add(entry);
+    });
+
+    return entries;
   }
 
   @override
@@ -63,7 +62,7 @@ class _JournalPageState extends State<JournalPage> {
     super.didChangeDependencies();
 
     if (widget != null) {
-      this._getEntries();
+      this._loadEntriesFromClient();
     }
   }
 
@@ -75,16 +74,9 @@ class _JournalPageState extends State<JournalPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.userName.isEmpty? 'Reading' : '${widget.userName}\'s Entries'),
+        title: Text(widget.title),
         backgroundColor: Theme.of(context).primaryColor,
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: () {    
-             this._getEntries();
-            },
-          )
-        ],
+        actions: showReloadButton(),
       ),
       drawer: DrawerView(),
       body: this._isLoading ? loadBar : Center(
@@ -97,6 +89,20 @@ class _JournalPageState extends State<JournalPage> {
         ),
       ),
     );
+  }
+
+  List<Widget> showReloadButton() {
+    if (!widget.reloadDisabled) {
+      return [
+        IconButton(
+          icon: Icon(Icons.refresh),
+          onPressed: () {    
+           this._loadEntriesFromClient();
+          },
+        )];
+    }
+
+    return [];    
   }
 }
 

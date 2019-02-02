@@ -1,49 +1,68 @@
+import 'package:dreamwithme/main.dart';
 import 'package:dreamwithme/utils/date.dart';
+import 'package:dreamwithme/widgets/calendar/cell_view.dart';
 import 'package:flutter/material.dart';
 
 class CalendarView extends StatefulWidget {
-  final Map<String, int> days;
 
-  const CalendarView({Key key, this.days}) : super(key: key);
+  const CalendarView({Key key}) : super(key: key);
   @override
   State createState() => new _CalendarView();
 }
 
-class _CalendarView extends State<CalendarView> {  
-  final Calendar date = Calendar();
+class _CalendarView extends State<CalendarView> {
+  final Calendar _date = Calendar();
+  Map<String, int> _entriesPerDay = {};
+
+  @override
+  void initState() {
+    DreamWithMe.client
+        .getDayCount(DreamWithMe.client.currentUser.userName)
+        .then((Map<String, int> entriesPerDay) {
+      setState(() {
+        this._entriesPerDay.addAll(entriesPerDay);
+      });
+    });
+
+    super.initState();
+  }
 
   void _decreaseYear() {
     setState(() {
-      this.date.decreaseYear();
+      this._date.decreaseYear();
     });
   }
 
   void _increaseYear() {
     setState(() {
-      this.date.increaseYear();
+      this._date.increaseYear();
     });
   }
 
   void _decreaseMonth() {
     setState(() {
-      this.date.decreaseMonth();
+      this._date.decreaseMonth();
     });
   }
 
   void _increaseMonth() {
     setState(() {
-      this.date.increaseMonth();
+      this._date.increaseMonth();
     });
   }
 
   bool _hasDayEntries(int year, int month, int day) {
+    if (this._entriesPerDay == null) {
+      return false;
+    }
+
     String formattedDate = formatDate(year, month, day, '-');
-    return widget.days.containsKey(formattedDate);
+    return this._entriesPerDay.containsKey(formattedDate);
   }
 
   List<Widget> _cellBuilder() {
-    int monthDays = this.date.monthDays;
-    int weekDay = this.date.weekday;
+    int monthDays = this._date.monthDays;
+    int weekDay = this._date.weekday;
 
     int indexDay = 1;
     List<Widget> list = [];
@@ -55,16 +74,14 @@ class _CalendarView extends State<CalendarView> {
       for (var j = 1; j <= 7; j++) {
         if (((j == weekDay && indexDay == 1) || indexDay > 1) &&
             indexDay <= monthDays) {
-          bool hasDayEntries = this._hasDayEntries(this.date.year, this.date.month, indexDay);
-          list.add(InkWell(
-              child: Text(indexDay.toString(),
-                  style: TextStyle(
-                      color: hasDayEntries 
-                            ? Colors.red.shade900 
-                            : Colors.black)),
-              onTap: () {
-                print(indexDay.toString());
-              }));
+          bool hasDayEntries = this._hasDayEntries(this._date.year, this._date.month, indexDay);
+          list.add(CellView( 
+            formatDate(this._date.year, this._date.month, indexDay, '-'),
+            hasDayEntries,
+            this._date.year,
+            this._date.month,
+            indexDay));
+
           indexDay++;
         } else {
           list.add(Text(''));
@@ -85,11 +102,11 @@ class _CalendarView extends State<CalendarView> {
               child: Row(
             children: <Widget>[
               arrowButton(Icons.keyboard_arrow_left, this._decreaseYear),
-              Text(this.date.year.toString()),
+              Text(this._date.year.toString()),
               arrowButton(Icons.keyboard_arrow_right, this._increaseYear),
               SizedBox(width: 10.0),
               arrowButton(Icons.keyboard_arrow_left, this._decreaseMonth),
-              Text(this.date.getMonthString()),
+              Text(this._date.getMonthString()),
               arrowButton(Icons.keyboard_arrow_right, this._increaseMonth)
             ],
           ))),
@@ -106,6 +123,7 @@ class _CalendarView extends State<CalendarView> {
   }
 
   IconButton arrowButton(IconData icon, Function action) {
-    return IconButton(icon: Icon(icon),  onPressed: () { action(); });
+    return IconButton(icon: Icon(icon), onPressed: () => action());
   }
+
 }
