@@ -17,11 +17,6 @@ class EntryHeaderView extends StatelessWidget {
     return Container(
         width: MediaQuery.of(context).size.width,
         padding: EdgeInsets.all(5.0),
-        // decoration: BoxDecoration(
-        //   // border: Border(
-        //   //     top: BorderSide(width: 5, color: Theme.of(context).primaryColor)),
-        //   //gradient: LinearGradient(colors: [Colors.red.shade900, Colors.red.shade600]),
-        // ),
         child: Column(
           children: <Widget>[
             Container(
@@ -29,9 +24,9 @@ class EntryHeaderView extends StatelessWidget {
                 trailing: Text(this.entry.posterName, style: posterInfo),
                 leading: Text(this.entry.journalName, style: posterInfo),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => JournalPage(userName: this.entry.posterName))
-                  );
+                  // Navigator.of(context).push(MaterialPageRoute(
+                  //   builder: (context) => JournalPage(userName: this.entry.posterName))
+                  // );
                 },
               ),
               decoration: BoxDecoration(color: Theme.of(context).primaryColor),
