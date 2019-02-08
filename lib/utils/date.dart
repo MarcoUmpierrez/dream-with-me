@@ -115,7 +115,7 @@ class Calendar {
 String formatDate(int year, int month, int day, String separator) {
     assert(year >= 1);
     assert(month >= 1 && month <= 12);
-    assert(day >= 1 && day <= 31);
+    assert(day >= 0 && day <= 31);
 
   String formattedDate = year.toString();
   

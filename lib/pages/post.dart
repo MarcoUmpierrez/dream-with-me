@@ -19,7 +19,8 @@ class _PostPageState extends State<PostPage> {
   String _title, _body;
   DateTime _date = DateTime.now();
   List<Tuple<String, bool>> _tags = [];
-  String _tagCaption = 'Select tags';
+  static const String TAG_CAPTION = 'Select tags';
+  String _tagCaption = TAG_CAPTION;
   String _security;
   List<String> _securityOptions = ['Public', 'Friends', 'Private'];
   List<DropdownMenuItem<String>> _securityDropDown;
@@ -44,7 +45,7 @@ class _PostPageState extends State<PostPage> {
   void _updateTags() {
     String result = '';
     if (this._tags.length == 0) {
-      result = 'Select tags';
+      result = TAG_CAPTION;
     } else {
       this._tags.forEach((tag) {
         if (tag.value) {
@@ -53,7 +54,7 @@ class _PostPageState extends State<PostPage> {
       });
 
       if (result.isEmpty) {
-        result = 'Select tags';
+        result = TAG_CAPTION;
       } else {
         result = result.substring(0, result.length - 2);
       }
@@ -94,8 +95,9 @@ class _PostPageState extends State<PostPage> {
             icon: Icon(Icons.send),
             onPressed: () {
               this._formKey.currentState.save();
+              String tags = this._tagCaption == TAG_CAPTION? '' : this._tagCaption; 
               DreamWithMe.client
-                  .post(this._title, this._body, this._tagCaption, this._security, this._date)
+                  .post(this._title, this._body, tags, this._security, this._date)
                   .then((isSuccessful) {
                     if (isSuccessful) {
                       print('RESULT: Entry successfully published');

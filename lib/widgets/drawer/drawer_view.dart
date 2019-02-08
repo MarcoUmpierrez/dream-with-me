@@ -90,7 +90,13 @@ class DrawerView extends StatelessWidget {
             title: Text('Logout'),
             trailing: Icon(Icons.exit_to_app),
             onTap: () { this.logOut(context); },
-          )
+          ),          
+          Divider(),
+          AboutListTile(
+            applicationName: 'Dream With Me',
+            applicationVersion: '0.0.0.1',
+            applicationIcon: Image.asset('images/dreamwithme.png', width: 50.0, height: 50.0),
+          )  
         ],
       ),
     );
