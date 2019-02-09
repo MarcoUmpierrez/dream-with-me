@@ -1,5 +1,4 @@
 import 'package:dreamwithme/models/entry.dart';
-import 'package:dreamwithme/pages/single_entry.dart';
 import 'package:flutter/material.dart';
 
 class EntryFooterView extends StatelessWidget {

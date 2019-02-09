@@ -224,7 +224,8 @@ class DreamWidthClient {
               ..subject = this._getMapValue(map, EventParams.Subject)
               ..logTime = this._getMapValue(map, EventParams.LogTime)
               ..itemId = this._getMapValue(map, EventParams.ItemId)
-              ..anum = this._getMapValue(map, EventParams.Anum);
+              ..anum = this._getMapValue(map, EventParams.Anum)
+              ..security = this._getMapValue(map, EventParams.Security);
 
             if (map.containsKey(EventParams.Props)) {
               Map<String, XmlParam> props =

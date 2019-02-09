@@ -75,6 +75,7 @@ class EventParams {
   static const String LogTime = 'logtime';
   static const String ItemId = 'itemid';
   static const String Anum = 'anum';
+  static const String Security = 'security';
   static const String Props = 'props';
   static const String PictureKeyword = 'picture_keyword';
   static const String Interface = 'interface';

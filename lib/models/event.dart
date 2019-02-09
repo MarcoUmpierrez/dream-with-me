@@ -11,4 +11,5 @@ class Event {
   String tagList;
   String optScreening;
   String poster;
+  String security;
 }

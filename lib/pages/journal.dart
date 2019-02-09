@@ -50,6 +50,7 @@ class _JournalPageState extends State<JournalPage> {
       entry
       ..itemId = event.itemId
       ..eventRaw = event.event
+      ..security = event.security
       ..logTime = DateTime.parse(event.logTime).millisecondsSinceEpoch ~/ 1000;
       entries.add(entry);
     });
