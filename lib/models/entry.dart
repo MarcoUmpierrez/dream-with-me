@@ -1,6 +1,5 @@
 class Entry {
   String journalName;
-  int logTime;
   int itemId;
   String posterName;
   String security;
@@ -8,12 +7,15 @@ class Entry {
   String eventRaw;
   String subjectRaw;
   String journalType;
+  String tags;
+  DateTime date;
 
   Entry(String journalName, String posterName, String subject, String body) {
     this.journalName = journalName ?? 'Journal';
     this.posterName = posterName ?? 'Poster';
     this.subjectRaw = subject ?? 'No Subject';
     this.eventRaw = body ?? 'No content';
+    this.tags = '';
   }
 
   String getContent() {
@@ -27,8 +29,21 @@ class Entry {
     return content;
   }
 
-  DateTime getDate() {
+  void setDateFromLogTime(dynamic logTime) {
+    if (logTime is String) {
+      this._setDateFromLogTimeString(logTime);
+    } else if (logTime is int) {
+      this._setDateFromLogTimeInt(logTime);
+    }
+  }
+
+  void _setDateFromLogTimeInt(int logTime) {
     // multiply by 1000 to get the milliseconds
-    return DateTime.fromMillisecondsSinceEpoch(this.logTime*1000);
+    this.date = DateTime.fromMillisecondsSinceEpoch(logTime*1000);
+  }
+
+  void _setDateFromLogTimeString(String logTime) {
+    // convert date to milliseconds and adjust it
+    this._setDateFromLogTimeInt(DateTime.parse(logTime).millisecondsSinceEpoch ~/ 1000);
   }
 } 

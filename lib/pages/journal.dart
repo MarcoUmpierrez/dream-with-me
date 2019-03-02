@@ -43,6 +43,7 @@ class _JournalPageState extends State<JournalPage> {
     }    
   }
 
+  // TODO: update list entry view after editing an entry
   List<Entry> _convertEventToEntries(List<Event> list, userName) {
     List<Entry> entries = [];
     list.forEach((Event event) {
@@ -51,7 +52,8 @@ class _JournalPageState extends State<JournalPage> {
       ..itemId = event.itemId
       ..eventRaw = event.event
       ..security = event.security
-      ..logTime = DateTime.parse(event.logTime).millisecondsSinceEpoch ~/ 1000;
+      ..tags = event.tagList;
+      entry.setDateFromLogTime(event.logTime);
       entries.add(entry);
     });
 

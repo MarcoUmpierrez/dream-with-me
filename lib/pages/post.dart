@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'package:dreamwithme/main.dart';
+import 'package:dreamwithme/models/account.dart';
+import 'package:dreamwithme/models/entry.dart';
 import 'package:dreamwithme/models/tag.dart';
 import 'package:dreamwithme/utils/tuple.dart';
 import 'package:dreamwithme/widgets/date_view.dart';
@@ -8,28 +11,47 @@ import 'package:flutter/material.dart';
 
 class PostPage extends StatefulWidget {
   static String tag = 'post-page';
+  final Entry entry;
 
-  const PostPage({Key key}) : super(key: key);
+  const PostPage({Key key, this.entry}) : super(key: key);
 
   @override
   _PostPageState createState() => new _PostPageState();
 }
 
 class _PostPageState extends State<PostPage> {
-  String _title, _body;
-  DateTime _date = DateTime.now();
   List<Tuple<String, bool>> _tags = [];
   static const String TAG_CAPTION = 'Select tags';
-  String _tagCaption = TAG_CAPTION;
-  String _security;
-  List<String> _securityOptions = ['Public', 'Friends', 'Private'];
+  static const String SECURITY_PUBLIC = 'Public';
+  static const String SECURITY_FRIENDS = 'Friends';
+  static const String SECURITY_PRIVATE = 'Private';
   List<DropdownMenuItem<String>> _securityDropDown;
+  TextEditingController titleController, bodyController;
+  
+  Entry entry;
 
   final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
-    super.initState();
+    // initialize drop down options
+    this._securityDropDown = [];
+    this._securityDropDown.add(DropdownMenuItem(value: 'public', child: Text(SECURITY_PUBLIC)));
+    this._securityDropDown.add(DropdownMenuItem(value: 'usemask', child: Text(SECURITY_FRIENDS)));
+    this._securityDropDown.add(DropdownMenuItem(value: 'private', child: Text(SECURITY_PRIVATE)));
+    
+    // initialize entry
+    if (widget.entry == null) {
+      Account user = DreamWithMe.client.currentUser;
+      this.entry = new Entry(user.userName, user.fullUserName, '', '');
+      this.entry.security = '';
+      this.entry.date = DateTime.now();
+    } else {
+      this.entry = widget.entry;
+      this.entry.date = widget.entry.date;
+    }
+
+    // request tags
     DreamWithMe.client.getUserTags().then((List<Tag> tags) {
       tags.sort((a, b) => a.name.compareTo(b.name));
       tags.forEach((Tag tag) {
@@ -37,32 +59,112 @@ class _PostPageState extends State<PostPage> {
       });
     });
 
-    this._securityDropDown = [];
-    this._securityOptions.forEach((String option) => this._securityDropDown.add(DropdownMenuItem(value: option, child: Text(option))));
-    this._security = this._securityDropDown[0].value;
+    // it's necessary to define these controllers outside of the build method
+    this.titleController = TextEditingController(text: this.entry.subjectRaw);
+    this.bodyController = TextEditingController(text: this.entry.eventRaw);
+
+    super.initState();
+  } 
+
+  void _setEntryTitle(String value) { 
+    setState(() {
+      this.entry.subjectRaw = value;      
+    });
   }
 
-  void _updateTags() {
-    String result = '';
-    if (this._tags.length == 0) {
-      result = TAG_CAPTION;
-    } else {
-      this._tags.forEach((tag) {
-        if (tag.value) {
-          result += '${tag.key}, ';
-        }
-      });
+  void _setEntryBody(String value) {
+    setState(() {   
+      this.entry.eventRaw = value;
+    });
+  }
 
-      if (result.isEmpty) {
-        result = TAG_CAPTION;
-      } else {
-        result = result.substring(0, result.length - 2);
-      }
+  void _postEntry(BuildContext context) {
+    this._formKey.currentState.save();
+    Future<bool> result;
+    if (this.entry.itemId > 0) {
+      result = DreamWithMe.client.editEntry(this.entry);
+    } else {
+      result = DreamWithMe.client.postEntry(this.entry);
     }
 
-    setState(() {
-      this._tagCaption = result;
+    result.then((isSuccessful) {
+      if (isSuccessful) {
+        print('RESULT: Entry successfully published');
+        Navigator.pop(context);                      
+      } else {
+        print('RESULT: Entry not published');
+        Scaffold.of(context).showSnackBar(
+            SnackBar(content: Text('Entry not published')));
+      }
     });
+  }  
+
+  void _pickDate(BuildContext context) {
+    showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.parse('1950-01-01 00:00:00.000'),
+      lastDate: DateTime.parse('2150-01-01 00:00:00.000'),
+    ).then((DateTime value) {
+      if (value != null) {
+        setState(() {
+          this.entry.date = DateTime(
+              value.year,
+              value.month,
+              value.day,
+              this.entry.date.hour,
+              this.entry.date.minute);
+        });
+      }
+    });
+  }
+
+  void _pickTime(BuildContext context) {
+    showTimePicker(
+            context: context,
+            initialTime: TimeOfDay.now())
+        .then((TimeOfDay value) {
+      if (value != null) {
+        setState(() {
+          this.entry.date = DateTime(
+              this.entry.date.year,
+              this.entry.date.month,
+              this.entry.date.day,
+              value.hour,
+              value.minute);
+        });
+      }
+    });
+  }
+
+  void _setSecurity(String value) {
+    setState(() {
+      this.entry.security = value;
+    });
+  }
+
+  void _pickTags(BuildContext context) {
+    showCheckBoxList(
+            context: context,
+            title: 'Select Tags',
+            options: this._tags)
+        .then((_) {
+           setState(() {
+             // update entry tags
+            this.entry.tags = '';
+            if (this._tags.length > 0) {
+              this._tags.forEach((tag) {
+                if (tag.value) {
+                  this.entry.tags += '${tag.key}, ';
+                }
+              });
+
+              if (this.entry.tags.isNotEmpty) {
+                this.entry.tags.substring(0, this.entry.tags.length - 2);
+              }
+            }
+          });
+        });
   }
 
   @override
@@ -70,20 +172,18 @@ class _PostPageState extends State<PostPage> {
     final entryTitle = TextFormField(
       keyboardType: TextInputType.text,
       autofocus: false,
-      decoration: InputDecoration(
-        hintText: 'Entry Title',
-      ),
-      onSaved: (value) => this._title = value,
+      controller: this.titleController,
+      decoration: InputDecoration(hintText: 'Entry Title'),
+      onSaved: (value) => this._setEntryTitle(value),
     );
 
     final entryBody = TextFormField(
       autofocus: false,
       maxLines: 15,
-      decoration: InputDecoration(
-        hintText: 'What do you want to share today?',
-      ),
+      controller: this.bodyController,
+      decoration: InputDecoration(hintText: 'What do you want to share today?'),
       keyboardType: TextInputType.multiline,
-      onSaved: (value) => this._body = value,
+      onSaved: (value) => this._setEntryBody(value),
     );
 
     return Scaffold(
@@ -93,22 +193,7 @@ class _PostPageState extends State<PostPage> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.send),
-            onPressed: () {
-              this._formKey.currentState.save();
-              String tags = this._tagCaption == TAG_CAPTION? '' : this._tagCaption; 
-              DreamWithMe.client
-                  .post(this._title, this._body, tags, this._security, this._date)
-                  .then((isSuccessful) {
-                    if (isSuccessful) {
-                      print('RESULT: Entry successfully published');
-                      Navigator.pop(context);                      
-                    } else {
-                      print('RESULT: Entry not published');
-                      Scaffold.of(context).showSnackBar(
-                          SnackBar(content: Text('Entry not published')));
-                    }
-                  });
-            },
+            onPressed: () => this._postEntry(context),
           )
         ],
       ),
@@ -122,78 +207,32 @@ class _PostPageState extends State<PostPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       FlatButton(
-                          child: DateView(_date),
-                          onPressed: () {
-                            showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime.parse('1950-01-01 00:00:00.000'),
-                              lastDate: DateTime.parse('2150-01-01 00:00:00.000'),
-                            ).then((value) {
-                              if (value != null) {
-                                setState(() {
-                                  this._date = DateTime(
-                                      value.year,
-                                      value.month,
-                                      value.day,
-                                      this._date.hour,
-                                      this._date.minute);
-                                });
-                              }
-                            });
-                          }),
+                        child: DateView(this.entry.date),
+                        onPressed: () => this._pickDate(context)),
                       FlatButton(
-                          child: TimeView(_date),
-                          onPressed: () {
-                            showTimePicker(
-                                    context: context,
-                                    initialTime: TimeOfDay.now())
-                                .then((value) {
-                              if (value != null) {
-                                setState(() {
-                                  this._date = DateTime(
-                                      this._date.year,
-                                      this._date.month,
-                                      this._date.day,
-                                      value.hour,
-                                      value.minute);
-                                });
-                              }
-                            });
-                          })
+                        child: TimeView(this.entry.date),
+                        onPressed: () => this._pickTime(context))
                     ]),
                 entryTitle,
                 entryBody,
                 FlatButton(
                     child: Row(children: <Widget>[
                       Icon(Icons.loyalty),
-                      Text(this._tagCaption)
+                      Text(this.entry.tags.isEmpty ? TAG_CAPTION : this.entry.tags)
                     ]),
-                    onPressed: () {
-                      showCheckBoxList(
-                              context: context,
-                              title: 'Select Tags',
-                              options: this._tags)
-                          .then((_) {
-                        this._updateTags();
-                      });
-                    }),
+                    onPressed: () => this._pickTags(context)),
                     Container(
                       padding: EdgeInsets.fromLTRB(15.0, 0.0, 0.0, 0.0),
                       child: Row(
                         children: <Widget>[
                           Icon(Icons.lock),
                           DropdownButton(
-                            value: this._security,
+                            value: this.entry.security,
                             items: this._securityDropDown,
                             style: TextStyle(color: Colors.black, fontSize: 14.0),
-                            onChanged: (String value) {
-                              setState(() {
-                                this._security = value;
-                              });
-                            },
+                            onChanged: (String value) => this._setSecurity(value),
                           )
-                    ],),)
+                    ]))
                     
               ],
             ),

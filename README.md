@@ -19,11 +19,13 @@ This is a hobby project with two main purposes:
   - Add title and content
   - Select privacy (Public, Access list (friends) or Private)
   - Select / Add tags
+- Edit entries
 
 ### In Progress
 - Multiple accounts
 
 ### Desired
+- Delete entries
 - Public / Read comments
 - Display Inbox messages
 - Display friends' journals entries

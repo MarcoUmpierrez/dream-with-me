@@ -25,13 +25,15 @@ final Map<int, String> days = {
 
 class Calendar {
   DateTime now;
+  DateTime date;
   int year, month, day, weekday, monthDays;
 
-  Calendar() {
+  Calendar({DateTime date}) {
+    this.date = date;
     this.now = DateTime.now();
-    this.year = this.now.year;
-    this.month = this.now.month;
-    this.day = this.now.day;
+    this.year = this.date.year;
+    this.month = this.date.month;
+    this.day = this.date.day;
     this._updateDateInfo();
   }
 
@@ -101,6 +103,10 @@ class Calendar {
     // get the month last day number. For example
     // 20190200 returns 31 days (31 in January)
     return DateTime.parse(formatDate(year, month, 0, '')).day;
+  }
+
+  DateTime getCurrentDate() {
+    return DateTime.parse(formatDate(this.year, this.month, 1, ''));
   }
 
   int _firstDayOfTheMonth() {

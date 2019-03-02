@@ -10,8 +10,9 @@ class CalendarView extends StatefulWidget {
   State createState() => new _CalendarView();
 }
 
+// TODO: fix the error "Exception: setState() called after dispose(): _CalendarView"
 class _CalendarView extends State<CalendarView> {
-  final Calendar _date = Calendar();
+  final Calendar _date = Calendar(date: DreamWithMe.client.calendarDate);
   Map<String, int> _entriesPerDay = {};
 
   @override
@@ -30,24 +31,28 @@ class _CalendarView extends State<CalendarView> {
   void _decreaseYear() {
     setState(() {
       this._date.decreaseYear();
+      DreamWithMe.client.calendarDate = this._date.getCurrentDate();
     });
   }
 
   void _increaseYear() {
     setState(() {
       this._date.increaseYear();
+      DreamWithMe.client.calendarDate = this._date.getCurrentDate();
     });
   }
 
   void _decreaseMonth() {
     setState(() {
       this._date.decreaseMonth();
+      DreamWithMe.client.calendarDate = this._date.getCurrentDate();
     });
   }
 
   void _increaseMonth() {
     setState(() {
       this._date.increaseMonth();
+      DreamWithMe.client.calendarDate = this._date.getCurrentDate();
     });
   }
 
