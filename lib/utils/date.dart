@@ -24,122 +24,64 @@ final Map<int, String> days = {
 };
 
 class Calendar {
-  DateTime now;
   DateTime date;
-  int year, month, day, weekday, monthDays;
 
   Calendar({DateTime date}) {
+    if (date != null) {
+      this.date = DateTime(date.year, date.month, 1); 
+    } else {
+      var now = DateTime.now();
+      this.date = DateTime(now.year, now.month, 1);
+    }
+
     this.date = date;
-    this.now = DateTime.now();
-    this.year = this.date.year;
-    this.month = this.date.month;
-    this.day = this.date.day;
-    this._updateDateInfo();
   }
 
   String getMonthString() {
-    assert(this.month >= 1 && this.month <= 12);
-
-    return months[this.month];
+    return months[this.date.month];
   }
 
   String getDayLetter() {
-    assert(this.weekday >= 1 && this.weekday <= 7);
-
-    return days[this.weekday];
+    return days[this.weekday()];
   }
 
-  void increaseYear() {    
-    assert(this.year >= 1);
-
-    this.year++;
-    this._updateDateInfo();
+  void increaseYear() {
+    this.date = DateTime(this.date.year+1, this.date.month, 1);
   }
 
   void decreaseYear() {
-    assert(this.year >= 1);
-
-    this.year--;
-    this._updateDateInfo();
+    this.date = DateTime(this.date.year-1, this.date.month, 1);
   }
 
   void increaseMonth() {
-    assert(this.month >= 1 && this.month <= 12);
-
-    this.month++;
-    if (this.month == 13) {
-      this.month = 1;
-    }
-
-    this._updateDateInfo();
+    this.date = DateTime(this.date.year, (this.date.month + 1) == 13? 1: this.date.month + 1, 1);
   }
 
   void decreaseMonth() {
-    assert(this.month >= 1 && this.month <= 12);
-    this.month--;
-    if (this.month == 0) {
-      this.month = 12;
-    }
-    
-    this._updateDateInfo();
+    this.date = DateTime(this.date.year, (this.date.month - 1) == 0? 12: this.date.month - 1, 1);
   }
 
-  void _updateDateInfo() {    
-    this.monthDays = this._daysOfTheMonth();
-    this.weekday = this._firstDayOfTheMonth();
-  }
-
-  int _daysOfTheMonth() {  
-    assert(this.year >= 1);  
-    assert(this.month >= 1 && this.month <= 12);
-
-    int year = this.year;
-    int month = this.month + 1;
-    if (month == 13) {
-      year++;
-      month = 1;
-    }
-
+  int monthDays() {
     // get the month last day number. For example
     // 20190200 returns 31 days (31 in January)
-    return DateTime.parse(formatDate(year, month, 0, '')).day;
+    return DateTime.parse(formatDate(this.date.year, (this.date.month + 1) == 13? 1 : this.date.month + 1, 0, '')).day;
   }
 
   DateTime getCurrentDate() {
-    return DateTime.parse(formatDate(this.year, this.month, 1, ''));
+    return DateTime.parse(formatDate(this.date.year, this.date.month, 1, ''));
   }
 
-  int _firstDayOfTheMonth() {
-    assert(this.year >= 1);  
-    assert(this.month >= 1 && this.month <= 12);
-
-    return DateTime.parse(formatDate(this.year, this.month, 1, '')).weekday;
+  int weekday() {
+    return DateTime.parse(formatDate(this.date.year, this.date.month, 1, '')).weekday;
   }
 }
   
 
 String formatDate(int year, int month, int day, String separator) {
-    assert(year >= 1);
-    assert(month >= 1 && month <= 12);
-    assert(day >= 0 && day <= 31);
-
-  String formattedDate = year.toString();
-  
+  String formattedDate = year.toString();  
   formattedDate += separator;
-
-  if (month < 10) {
-    formattedDate += '0$month';
-  } else {
-    formattedDate += '$month';
-  }
-  
+  formattedDate += month < 10? '0$month' : '$month';  
   formattedDate += separator;
-
-  if (day < 10) {
-    formattedDate +='0$day';
-  } else {
-    formattedDate +='$day';
-  }
-  
+  formattedDate += day < 10? '0$day' : '$day';  
   return formattedDate;
 }

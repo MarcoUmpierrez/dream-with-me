@@ -66,8 +66,8 @@ class _CalendarView extends State<CalendarView> {
   }
 
   List<Widget> _cellBuilder() {
-    int monthDays = this._date.monthDays;
-    int weekDay = this._date.weekday;
+    int monthDays = this._date.monthDays();
+    int weekDay = this._date.weekday();
 
     int indexDay = 1;
     List<Widget> list = [];
@@ -79,12 +79,12 @@ class _CalendarView extends State<CalendarView> {
       for (var j = 1; j <= 7; j++) {
         if (((j == weekDay && indexDay == 1) || indexDay > 1) &&
             indexDay <= monthDays) {
-          bool hasDayEntries = this._hasDayEntries(this._date.year, this._date.month, indexDay);
+          bool hasDayEntries = this._hasDayEntries(this._date.date.year, this._date.date.month, indexDay);
           list.add(CellView( 
-            formatDate(this._date.year, this._date.month, indexDay, '-'),
+            formatDate(this._date.date.year, this._date.date.month, indexDay, '-'),
             hasDayEntries,
-            this._date.year,
-            this._date.month,
+            this._date.date.year,
+            this._date.date.month,
             indexDay));
 
           indexDay++;
@@ -107,7 +107,7 @@ class _CalendarView extends State<CalendarView> {
               child: Row(
             children: <Widget>[
               arrowButton(Icons.keyboard_arrow_left, this._decreaseYear),
-              Text(this._date.year.toString()),
+              Text(this._date.date.year.toString()),
               arrowButton(Icons.keyboard_arrow_right, this._increaseYear),
               SizedBox(width: 10.0),
               arrowButton(Icons.keyboard_arrow_left, this._decreaseMonth),
