@@ -31,28 +31,28 @@ class _CalendarView extends State<CalendarView> {
   void _decreaseYear() {
     setState(() {
       this._date.decreaseYear();
-      DreamWithMe.client.calendarDate = this._date.getCurrentDate();
+      DreamWithMe.client.calendarDate = this._date.date;
     });
   }
 
   void _increaseYear() {
     setState(() {
       this._date.increaseYear();
-      DreamWithMe.client.calendarDate = this._date.getCurrentDate();
+      DreamWithMe.client.calendarDate = this._date.date;
     });
   }
 
   void _decreaseMonth() {
     setState(() {
       this._date.decreaseMonth();
-      DreamWithMe.client.calendarDate = this._date.getCurrentDate();
+      DreamWithMe.client.calendarDate = this._date.date;
     });
   }
 
   void _increaseMonth() {
     setState(() {
       this._date.increaseMonth();
-      DreamWithMe.client.calendarDate = this._date.getCurrentDate();
+      DreamWithMe.client.calendarDate = this._date.date;
     });
   }
 

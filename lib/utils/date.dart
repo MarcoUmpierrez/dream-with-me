@@ -67,10 +67,6 @@ class Calendar {
     return DateTime.parse(formatDate(this.date.year, (this.date.month + 1) == 13? 1 : this.date.month + 1, 0, '')).day;
   }
 
-  DateTime getCurrentDate() {
-    return DateTime.parse(formatDate(this.date.year, this.date.month, 1, ''));
-  }
-
   int weekday() {
     return DateTime.parse(formatDate(this.date.year, this.date.month, 1, '')).weekday;
   }
