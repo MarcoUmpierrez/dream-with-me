@@ -44,7 +44,7 @@ class _PostPageState extends State<PostPage> {
     if (widget.entry == null) {
       Account user = DreamWithMe.client.currentUser;
       this.entry = new Entry(user.userName, user.fullUserName, '', '');
-      this.entry.security = '';
+      this.entry.security = 'public';
       this.entry.date = DateTime.now();
     } else {
       this.entry = widget.entry;
@@ -81,7 +81,7 @@ class _PostPageState extends State<PostPage> {
   void _postEntry(BuildContext context) {
     this._formKey.currentState.save();
     Future<bool> result;
-    if (this.entry.itemId > 0) {
+    if (this.entry.itemId != null) {
       result = DreamWithMe.client.editEntry(this.entry);
     } else {
       result = DreamWithMe.client.postEntry(this.entry);
